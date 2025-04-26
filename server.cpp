@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/04/25 01:52:49 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/04/26 14:34:57 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,17 +91,17 @@ void Server::Routine()
 		break;
 	}
 
-	for (size_t i = 0; i < fd_polls.size(); ++i) {
-		if (fd_polls[i].revents & POLLIN) {
-			if (fd_polls[i].fd == Fd) {
-				addClient(); // Yeni bağlantı
-			} else {
-				// SADECE HATA DURUMLARINDA removeClient ÇAĞIR
-				if (fd_polls[i].revents & (POLLERR | POLLHUP)) {
+	for (size_t i = 0; i < fd_polls.size(); ++i)
+	{
+		if (fd_polls[i].revents & POLLIN)
+		{
+			if (fd_polls[i].fd == Fd)
+				addClient();
+			else {
+				if (fd_polls[i].revents & (POLLERR | POLLHUP))
 					removeClient(i);
-				} else {
+				else
 					sendAndReceiveClient(i);
-				}
 			}
 		}
 	}
@@ -113,20 +113,19 @@ void Server::addClient()
 	socklen_t addr_len = sizeof(client_addr);
 	int client_fd = accept(Fd, (struct sockaddr*)&client_addr, &addr_len);
 
-	if (client_fd < 0) {
+	if (client_fd < 0)
+	{
 		throw std::runtime_error("accept error");
 		return;
 	}
 
 	fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-	// Poll listesine ekle
 	struct pollfd new_poll;
 	new_poll.fd = client_fd;
 	new_poll.events = POLLIN;
 	fd_polls.push_back(new_poll);
 
-	// Yeni client oluştur
 	cls.push_back(new Client(client_fd));
 
 	std::cout << "New client connected. FD: " << client_fd << std::endl;
@@ -138,13 +137,14 @@ void Server::sendAndReceiveClient(int poll_index)
 	int client_fd = fd_polls[poll_index].fd;
 	size_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 
-	if (bytes_read <= 0) {
+	if (bytes_read <= 0)
+	{
 		// SADECE gerçek hata durumlarında removeClient çağır
-		if (errno != EAGAIN && errno != EWOULDBLOCK) {
+		if (errno != EAGAIN && errno != EWOULDBLOCK)
 			removeClient(poll_index);
-		}
 	}
-	 else {
+	 else
+	{
 		buffer[bytes_read] = '\0';
 		response(client_fd, std::string(buffer));
 	}
@@ -181,13 +181,15 @@ void Server::response(int client_fd, const std::string& message)
 void Server::removeClient(int poll_index)
 {
 	// Sunucu soketini asla silme
-	if (poll_index == 0) {
+	if (poll_index == 0)
+	{
 		std::cerr << "Attempted to remove server socket!" << std::endl;
 		return;
 	}
 
 	// Geçerlik kontrolü
-	if (poll_index < 0 || (size_t)poll_index >= fd_polls.size()) {
+	if (poll_index < 0 || (size_t)poll_index >= fd_polls.size())
+	{
 		std::cerr << "Invalid poll_index: " << poll_index << std::endl;
 		return;
 	}
@@ -196,7 +198,8 @@ void Server::removeClient(int poll_index)
 	close(client_fd);
 
 	// Client listesinden kaldır (poll_index-1 çünkü ilk eleman sunucu)
-	if ((size_t)(poll_index-1) < cls.size()) {
+	if ((size_t)(poll_index-1) < cls.size())
+	{
 		delete cls[poll_index-1];
 		cls.erase(cls.begin() + poll_index - 1);
 	}
