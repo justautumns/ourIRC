@@ -6,32 +6,63 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/04/26 14:35:15 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/13 04:48:16 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
-#include "server.hpp"
+
+#include <string>
 #include <vector>
-#include <iostream>
-class Client
+#include "server.hpp"
+#include <ctime>
+
+class Client 
 {
-	private :
-	int	cFd;
-	std::string nick;
-	std::string user;
-	std::string infos;
-	std::string cbuffer;
-	std::vector<std::string> ccommands;
-	bool isAuth;
-	public :
+	private:
+	int fd;
+	std::string nickname;
+	std::string username;
+	std::string realname;
+	std::string hostname;
+	std::string buffer;
+	time_t last_activity;
+	int invalid_password_attempts;
+	bool hasPassword;
+	bool isRegistered;
+
+	public:
 	Client(int fd);
+	
+	// Getters
 	int getFd() const;
-	void setNick(const std::string& nick);
-	const std::string& getNick() const;
-	void authenticate();
-	bool isAuthenticated() const;
+	const std::string& getNickname() const;
+	const std::string& getUsername() const;
+	const std::string& getRealname() const;
+	const std::string& getHostname() const;
+	bool getHasPassword() const;
+	bool getIsRegistered() const;
+	
+	// Setters
+	void setNickname(const std::string& nick);
+	void setUserInfo(const std::string& user, const std::string& real);
+	void setPassword(bool status);
+	void setRegistered(bool status);
+	void updateLastActivity();
+	void setInvalidPasswordAttempt();
+
+	// Buffer management
+	void appendToBuffer(const std::string& data);
+	void clearBuffer();
+	const std::string& getBuffer() const;
+	void eraseFromBuffer(size_t pos, size_t len); 
+	
+	// Registration check
+	bool canRegister() const;
+	bool shouldDisconnect() const;
+	
 	~Client();
 };
+
 #endif

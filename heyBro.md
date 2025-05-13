@@ -51,3 +51,6 @@
 - #include <fcntl.h>       // fcntl(), O_NONBLOCK
 - #include <poll.h>        // poll()
 - #include <signal.h>      // signal(), sigaction()`
+
+## Source for IRC Protocol
+- https://www.rfc-editor.org/rfc/rfc1459.html

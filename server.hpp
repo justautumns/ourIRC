@@ -6,14 +6,14 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/04/25 01:43:49 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/13 04:49:32 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-
+#include "replies.hpp"
 #include "client.hpp"
 #include <iostream>
 #include <vector>
@@ -33,9 +33,11 @@
 #include <signal.h> // signal(), sigaction()
 #include <csignal>
 #include <errno.h>
+#include <iomanip>
+#include <ctime>
 
-#define MAX_CLIENT 10
-#define BUFFER_SIZE 512
+#define MAX_CLIENT 50
+#define BUFFER_SIZE 1024
 
 class Client;
 
@@ -47,7 +49,7 @@ class Server
 	std::string passwd;
 	int	Fd;
 	static int signal; // for signal function
-	std::vector<Client*> cls;
+	std::vector<Client *> cls;
 	std::vector<struct pollfd>	fd_polls;
 	
 	//Functions 
@@ -55,17 +57,22 @@ class Server
 	void	addClient();
 	void	sendAndReceiveClient(int poll_index);
 	void	removeClient(int poll_index);
-	void	response(int client_fd, const std::string& message);
-	// void	isNewConnection();
-	// void	newClientData(size_t poll_index);
-	// void	clientCommands(int cFd, const std::string &actualCommand);
-	// void	welcomeClients(int cFd);
+
+	// Client commands
+	void	numericReplies(int fd, int code, const std::string &msj) const;
+	void	parseHandleCmd(Client &client, const std::string &cmd);
+	void	passHandle(Client &client, const std::vector<std::string> &arguments);
+	void	nickNameHandle(Client &client, const std::vector<std::string> &arguments);
+	void	userHandle(Client &client, const std::vector<std::string> &arguments);
+	void	broadcast(const std::string& message, int exclude_fd = -1);
+	void	checkClientTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
 	
 	public :
 	void	Routine();
 	Server(const int port_,std::string password_);
 	void setupSignals();
 	void startServer();
+	std::string getCreationTime() const;
 	~Server();
 };
 
