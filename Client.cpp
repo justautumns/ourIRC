@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.cpp                                         :+:      :+:    :+:   */
+/*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/13 04:48:20 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/15 21:58:00 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-#include "client.hpp"
+#include "Client.hpp"
 #include <unistd.h>
 
 Client::Client(int fd) : fd(fd), hasPassword(false), isRegistered(false) {}

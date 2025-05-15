@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.cpp                                         :+:      :+:    :+:   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 17:37:15 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/15 21:58:42 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.hpp"
+#include "Server.hpp"
 
 int Server::signal = 0;
 Server::Server(const int port_, std::string password_) : port(port_) , passwd(password_)
@@ -82,7 +82,7 @@ void Server::Routine()
 	while (true)
 	{
 		int poll_returnValue = poll(fd_polls.data(), fd_polls.size(), 100);
-		// Here we use poll because we need multiple sockets to be connected and listened to, it is the only way if we're not gonna
+		// Here we use poll because we need multiple sockets to be connected and listen`ed to, it is the only way if we're not gonna
 		//use multi Threads. Instead of using different threads for each client we use poll or we could have used select but to be honest
 		// I never check how we could use that. Poll will listen to the sockets(Clients) as a non-blocking way. POLLIN will detect from which socket I mean
 		//client are we receiving data, POLLER will tell us there's an error on data receiving, POLLHUP will say connection is lost. data() is variables of the poll_fd's
@@ -154,7 +154,7 @@ void Server::sendAndReceiveClient(int poll_index)
 
 	if (bytes_read <= 0)
 	{
-		if (errno != EAGAIN && errno != EWOULDBLOCK)
+		if (errno != EWOULDBLOCK)
 			removeClient(poll_index);
 		return;
 	}

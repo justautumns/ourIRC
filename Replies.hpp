@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   replies.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:18:50 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/13 04:48:06 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/15 21:50:28 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// replies.hpp
-#pragma once
+#ifndef REPLIES_HPP
+#define REPLIES_HPP
 
 #define RPL_WELCOME 001
 #define RPL_YOURHOST 002
@@ -39,3 +39,5 @@
 #define ERR_INVITEONLYCHAN 473
 #define ERR_BADCHANNELKEY 475
 #define ERR_CHANOPRIVSNEEDED 482
+
+#endif
