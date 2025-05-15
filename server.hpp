@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/13 04:49:32 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/15 14:21:33 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ class Server
 	void	userHandle(Client &client, const std::vector<std::string> &arguments);
 	void	broadcast(const std::string& message, int exclude_fd = -1);
 	void	checkClientTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
+	void	privmsgHandle(Client &client, const std::vector<std::string>& args);
 	
 	public :
 	void	Routine();

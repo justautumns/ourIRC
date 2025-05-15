@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/13 04:48:03 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/15 17:37:15 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,12 @@
 int Server::signal = 0;
 Server::Server(const int port_, std::string password_) : port(port_) , passwd(password_)
 {
-	serverName = "ourIRC";
+	serverName = " IRC Server by Emre & Michal";
 	setupSignals();
 }
 
 void Server::startServer()
 {
-
 	// Create socket
 	this->Fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (Fd < 0)
@@ -71,7 +70,7 @@ void Server::startServer()
 	}
 	// Seting up the Poll
 	struct pollfd server_poll;
-	server_poll.fd = Fd; // We assign pollfd's fd to out socket Fd so we can accept new connections via socket Fd
+	server_poll.fd = Fd; // We assign pollfd's fd to our socket Fd so we can accept new connections via socket Fd
 	server_poll.events = POLLIN; // we listen to the events it will notice us when there's new connection on the socket
 	this->fd_polls.push_back(server_poll); // As we will deal with multiple connection we have to store them I used vector 
 	// If we decide to use select() we would use accept()/ recv() functions instead of POLLIN 
@@ -83,9 +82,14 @@ void Server::Routine()
 	while (true)
 	{
 		int poll_returnValue = poll(fd_polls.data(), fd_polls.size(), 100);
+		// Here we use poll because we need multiple sockets to be connected and listened to, it is the only way if we're not gonna
+		//use multi Threads. Instead of using different threads for each client we use poll or we could have used select but to be honest
+		// I never check how we could use that. Poll will listen to the sockets(Clients) as a non-blocking way. POLLIN will detect from which socket I mean
+		//client are we receiving data, POLLER will tell us there's an error on data receiving, POLLHUP will say connection is lost. data() is variables of the poll_fd's
+		// size says how many sockets are there. 100 is ms if no data received from the client in 100 milisecond that means connection is lost.
 		
 		if (poll_returnValue < 0 && signal == 0)
-		throw std::runtime_error("poll error");
+			throw std::runtime_error("poll error");
 		else if (signal)
 		{
 			std::cout << "Server shutting down..." << std::endl;
@@ -94,54 +98,59 @@ void Server::Routine()
 		
 		for (size_t i = 0; i < fd_polls.size(); ++i)
 		{
-			if (fd_polls[i].revents & POLLIN)
+			if (fd_polls[i].revents & POLLIN) // here revents are the events that has happend, like POLLIN POLLOUT etc. It is checkin at least one event have happened.
 			{
-				if (fd_polls[i].fd == Fd)
-				addClient(); // we add the client which is new
+				if (fd_polls[i].fd == Fd) 
+					addClient(); // we add the client which is new if the socket FD matches that we create in the function up there, I mean the previous function(startServer)
 				else 
 				{
-					// SADECE HATA DURUMLARINDA removeClient ÇAĞIR
-					if (fd_polls[i].revents & (POLLERR | POLLHUP))
-					removeClient(i);
-					else
-					sendAndReceiveClient(i);
+					if (fd_polls[i].revents & (POLLERR | POLLHUP)) // IF revents which means an event accoured and there's an error or connection lost we remove the client
+						removeClient(i);
+					else // Else we start examine the data that our socket receives from the clients.
+						sendAndReceiveClient(i);
 				}
 			}
 		}
 	}
+	// BTW I noticed that while I am writing explanation I sometimes fuck the indent level up, so in out fd_polls there are two types of FD's the first FD in our
+	// fd_polls array at index 0 is our main socket, if fd_polls[i] is 0 we are calling accept() function in our addClient function, and there we add an FD for each new client.
+	// In our routine function we use a while loop because we don't know which event will occure but we keep listening. So if the FD is something else than our main socket Fd
+	// That means we need to use recv/send functions in order to find our what data ve have from the client and what data our server will response. And we have functions for them
+	// below.
 }
 void Server::addClient()
 {
-	struct sockaddr_in client_addr;
-	socklen_t addr_len = sizeof(client_addr);
-	int client_fd = accept(Fd, (struct sockaddr*)&client_addr, &addr_len);
-
+	struct sockaddr_in client_addr; // This actually will hold IP and Port infos
+	socklen_t addr_len = sizeof(client_addr); // And this is the size of it it's needed by accept function
+	int client_fd = accept(Fd, (struct sockaddr*)&client_addr, &addr_len); // Here we create an Fd for the client and we tell our main socket to accept it.
+	// (struct sockaddr*)&client_addr we typecast that as sockaddr cuz accept checks the memory location of the client_addr via a pointer.
 	if (client_fd < 0)
 	{
-		std::cerr << "accept error: " << strerror(errno) << std::endl;
+		std::cerr << "accept error: " << strerror(errno) << std::endl; // Here I actually should throw an error but it's to be done later.
 		return;
 	}
 
 	fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-	// Adding to poll list
+	// Adding to poll list This time since we already create our main socket we create poll fd for clients. I called it new_poll but we can call it client_poll also
 	struct pollfd new_poll;
 	new_poll.fd = client_fd;
 	new_poll.events = POLLIN;
 	fd_polls.push_back(new_poll);
 
 	// push back new client I just didn't get back to using stack actually I also get error I tried
-	cls.push_back(new Client(client_fd));
+	Client *yeniUser = new Client(client_fd);
+	cls.push_back(yeniUser);
 
-	std::cout << "New client connected. FD: " << client_fd << std::endl;
+	std::cout << "New client connected FD number is : " << yeniUser->getFd() <<  std::endl;
 }
 
 void Server::sendAndReceiveClient(int poll_index)
 {
 	char buffer[BUFFER_SIZE];
 	int client_fd = fd_polls[poll_index].fd;
-	Client *client = cls[poll_index - 1];
-	ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+	Client *client = cls[poll_index - 1]; // I had a few time to find this - 1 cuz we have server fd in our fd_poll indexes it was painfull
+	ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0); // now we can receive data from clients
 
 	if (bytes_read <= 0)
 	{
@@ -155,7 +164,8 @@ void Server::sendAndReceiveClient(int poll_index)
 
 	// Process complete commands
 	size_t pos;
-	while ((pos = client->getBuffer().find("\r\n")) != std::string::npos)
+	// "COMMAND1\nCOMMAND2\n" can also bw tried that's why I used a loop but still not sure about \r
+	while ((pos = client->getBuffer().find("\n")) != std::string::npos) 
 	{
 		std::string command = client->getBuffer().substr(0, pos);
 		client->eraseFromBuffer(0, pos + 2);
@@ -171,7 +181,7 @@ std::string Server::getCreationTime() const
 	strftime(buf, sizeof(buf), "%a %b %d %Y at %H:%M:%S", localtime(&now));
 	return buf;
 }
-void Server::nickNameHandle(Client& client, const std::vector<std::string>& args)
+void Server::nickNameHandle(Client& client, const std::vector<std::string> &args)
 {
 	if (args.empty())
 	{
@@ -206,15 +216,12 @@ void Server::nickNameHandle(Client& client, const std::vector<std::string>& args
 		}
 	}
 
-	// If client was already registered, I try to broadcast to other clients but Idk
+	client.setNickname(newNick);
 	if (client.getIsRegistered())
 	{
-		std::string msg = ":" + client.getNickname() + " NICK :" + newNick + "\r\n";
+		std::string msg = client.getNickname() + " NICK :" + newNick + "\r\n";
 		broadcast(client.getNickname() + " NICK :" + newNick);
 	}
-
-	// Set new nickname
-	client.setNickname(newNick);
 
 	// If all goes well it means registiration was a success and we send a welcome msg
 	if (!client.getIsRegistered() && client.canRegister())
@@ -239,12 +246,22 @@ void Server::userHandle(Client &client, const std::vector<std::string>& args)
 	}
 
 	const std::string &username = args[0];
-	const std::string &realname = args[3];
+	// args[1] and args[2] are (hostname ve servername) in IRC it's kind of ignored, so user dont have to set those things 
+	// Therefore we pass 0 * hostname is 0 and server name is * but we can also set these things IDK.
+	// for realname I add this loop to grep spaces in between names.
+	std::string realname = args[3];
+	for (size_t i = 4; i < args.size(); ++i)
+		realname += " " + args[i];
 
-	// Set user info
+	// But in username it has to be one word so..
+	if (username.empty() || username.find(' ') != std::string::npos)
+	{
+		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "USER :Invalid username");
+		return;
+	}
+
 	client.setUserInfo(username, realname);
 
-	// If this also goes well which gave me lot of errors than, we send our welcome message
 	if (!client.getIsRegistered() && client.canRegister())
 	{
 		client.setRegistered(true);
@@ -253,7 +270,45 @@ void Server::userHandle(Client &client, const std::vector<std::string>& args)
 		numericReplies(client.getFd(), RPL_CREATED, ":This server was created by Emre and Michal at: " + getCreationTime());
 	}
 }
-void Server::parseHandleCmd(Client &client, const std::string &command) 
+
+void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
+{
+	if (!client.getIsRegistered())
+	{
+		numericReplies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
+		return;
+	}
+
+	if (args.size() < 2)
+	{
+		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PRIVMSG :Not enough parameters");
+		return;
+	}
+
+	const std::string &target = args[0];
+	const std::string &message = args[1];
+
+	// Kanal mesajı için (kanal adları # ile başlar)
+	if (target[0] == '#')
+	{
+		// Kanal işlemleri burada yapılacak
+		// Örnek: broadcastToChannel(target, ":" + client.getNickname() + " PRIVMSG " + target + " :" + message);
+	}
+	else // Kullanıcıya özel mesaj
+	{
+		for (size_t i = 0; i < cls.size(); ++i)
+		{
+			if (cls[i]->getNickname() == target)
+			{
+				std::string msg = client.getNickname() + " :" + message + "\r\n";
+				send(cls[i]->getFd(), msg.c_str(), msg.length(), 0);
+				return;
+			}
+		}
+		numericReplies(client.getFd(), ERR_NOSUCHNICK, target + " :No such nick/channel");
+	}
+}
+void Server::parseHandleCmd(Client &client, const std::string &command)
 {
 	std::vector<std::string> args;
 	std::istringstream iss(command);
@@ -266,23 +321,32 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 		return;
 
 	std::string cmd = args[0];
-	args.erase(args.begin());
+	args.erase(args.begin()); // I delete the command from the arguments so in other functions no need to pass the command part
 
-	std::cout << cmd << std::endl;
-	if (cmd == "PASS") passHandle(client, args);
-	else if (cmd == "NICK") nickNameHandle(client, args);
-	else if (cmd == "USER") userHandle(client, args);
-	// I will have to add other handles :)
-	// If the cmd is unknown goes into else
+	std::cout << "Received command: " << cmd << " from " << client.getNickname() << std::endl;
+
+	if (cmd == "/PASS") passHandle(client, args);
+	else if (cmd == "/NICK") nickNameHandle(client, args);
+	else if (cmd == "/USER") userHandle(client, args);
+	else if (cmd == "/PRIVMSG") privmsgHandle(client, args);
+	// Diğer komutlar buraya eklenebilir
 	else
-		numericReplies(client.getFd(), ERR_UNKNOWNCOMMAND, cmd + " :Unknown command");
+	{
+		//Eğer komut tanınmıyorsa, bunu genel bir mesaj olarak kabul edebiliriz
+		if (client.getIsRegistered())
+		{
+			std::string msg = client.getNickname() + " :" + command + "\r\n";
+			broadcast(msg, client.getFd());
+		}
+		else
+			numericReplies(client.getFd(), ERR_UNKNOWNCOMMAND, cmd + " :Unknown command");
+	}
 }
-
 
 void Server::numericReplies(int fd, int code, const std::string &message) const
 {
 	std::stringstream reply;
-	reply << ":" << serverName << " " << std::setw(3) << std::setfill('0') 
+	reply << serverName << " " << std::setw(3) << std::setfill('0')
 			<< code << " " << message << "\r\n";
 	send(fd, reply.str().c_str(), reply.str().length(), 0);
 }
@@ -361,8 +425,7 @@ void Server::removeClient(int poll_index)
 	{
 		if (cls[i]->getFd() == client_fd)
 		{
-			// I tried to announce leaving msg but didn't work for now.
-			broadcast(":" + cls[i]->getNickname() + " QUIT :Disconnected", client_fd);
+			broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
 			cls.erase(cls.begin() + i);
 			break;
 		}
@@ -383,4 +446,10 @@ void Server::setupSignals()
 }
 
 Server::~Server()
-{}
+{
+	for (size_t i = 0; i < cls.size(); i++)
+	{
+		delete cls[i];
+	}
+	cls.clear();
+}
