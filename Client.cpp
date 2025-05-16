@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/16 19:59:15 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/16 21:56:29 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,13 @@
 #include "Channel.hpp"
 #include <unistd.h>
 
-Client::Client(int fd) : fd(fd), hasPassword(false), isRegistered(false) {}
+Client::Client(int fd)
+{
+	this->fd = fd;
+	this->hasPassword = false;
+	this->isRegistered = false;
+	this->isInChannel = false;
+}
 
 Client::~Client()
 {
@@ -119,3 +125,7 @@ bool Client::canRegister() const
 {
 	return hasPassword && !getNickname().empty() && !getUsername().empty();
 }
+
+const std::string& Client::getJoinedChannelName() const {return this->joinedChannel;}
+void Client::setJoinedChannelName(std::string channel_name) {this->joinedChannel = channel_name; this->isInChannel = true;}
+bool Client::isMemberOfChannel() const {return this->isInChannel;}

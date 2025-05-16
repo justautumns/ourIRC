@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/16 20:09:59 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/17 00:16:35 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -409,6 +409,7 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 
 	// Kullanıcıyı kanala ekle
 	channel->addUser(&client);
+	client.setJoinedChannelName(channelName);
 
 	// Yanıt gönder
 	std::string joinMsg = client.getNickname() + " JOIN " + channelName + "\r\n";
@@ -425,6 +426,18 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 		std::cout << aa[i]->getNickname() << std::endl;
 	namesMsg += "\r\n";
 	send(client.getFd(), namesMsg.c_str(), namesMsg.length(), 0);
+}
+
+bool	Server::isChannelOperatorCmd(std::string cmd)
+{
+	if (cmd.compare("KICK") == 0 || cmd.compare("INVITE") == 0 || cmd.compare("TOPIC") == 0 || cmd.compare("MODE") == 0)
+		return true;
+	return false;
+}
+
+void	Server::executeKICK(Channel &channel, Client &client, std::string to_kick)
+{
+	std::cout << client.getNickname() << " kicked out " << to_kick << " from " << channel.getName() << "\n";
 }
 
 void Server::parseHandleCmd(Client &client, const std::string &command)
@@ -448,6 +461,9 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 
 	std::cout << "Received command: " << cmd << " from " << client.getNickname() << std::endl;
 
+	for (size_t i = 0; i < cmd.size(); i++)
+		cmd[i] = std::toupper(cmd[i]);
+
 	if (cmd == "CAP") capHandle(client, args);
 	else if (cmd == "PASS") passHandle(client, args);
 	else if (cmd == "USER") userHandle(client, args);
@@ -456,25 +472,58 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 	else if (cmd == "PRIVMSG") privmsgHandle(client, args);
 	else if (cmd == "PING") pingHandle(client, args);
 	else if (cmd == "PONG") pongHandle(client, args);
-	else if (cmd == "QUIT")
+	// else if (cmd == "QUIT")
+	// {
+	// 	std::string quitMsg = ":" + client.getNickname() + " QUIT :" + (args.empty() ? "Client quit" : args[0]) + "\r\n";
+	// 	broadcast(quitMsg, client.getFd());
+	// 	removeClient(client.getFd());
+	// }
+	// else if (cmd == "PART")
+	// {
+	// 	if (args.empty())
+	// 	{
+	// 		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PART :Channel name required");
+	// 		return;
+	// 	}
+	// 	Channel* channel = findOrCreateChannel(args[0]);
+	// 	if (channel)
+	// 	{
+	// 		channel->removeUser(&client);
+	// 		std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
+	// 		send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
+	// 	}
+	// }
+	else if (isChannelOperatorCmd(cmd))
 	{
-		std::string quitMsg = ":" + client.getNickname() + " QUIT :" + (args.empty() ? "Client quit" : args[0]) + "\r\n";
-		broadcast(quitMsg, client.getFd());
-		removeClient(client.getFd());
-	}
-	else if (cmd == "PART")
-	{
-		if (args.empty())
+		if (!client.isMemberOfChannel())
+			return (numericReplies(client.getFd(), ERR_NOTONCHANNEL, "You are not in a channel"));
+			
+		else if (cmd == "KICK")
 		{
-			numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PART :Channel name required");
-		return;
+			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
+			if (it != channels.end() && it->second->isOperator(&client))
+				executeKICK(*(it->second), client, args[2]);
 		}
-		Channel* channel = findOrCreateChannel(args[0]);
-		if (channel)
+		else if (cmd == "INVITE")
 		{
-			channel->removeUser(&client);
-			std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
-			send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
+			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
+			if (it != channels.end() && it->second->isOperator(&client))
+				// execute INVITE command
+				return;
+		}
+		else if (cmd == "TOPIC")
+		{
+			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
+			if (it != channels.end() && it->second->isOperator(&client))
+				// execute TOPIC command
+				return;
+		}
+		else
+		{
+			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
+			if (it != channels.end() && it->second->isOperator(&client))
+				// execute MODE command
+				return;
 		}
 	}
 	else

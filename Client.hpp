@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 21:59:07 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/16 21:55:44 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@ class Client
 	std::string realname;
 	std::string hostname;
 	std::string buffer;
+	std::string joinedChannel;
 	time_t last_activity;
 	int invalid_password_attempts;
 	bool hasPassword;
 	bool isRegistered;
+	bool isInChannel;
 
 	public:
 	Client(int fd);
@@ -41,8 +43,10 @@ class Client
 	const std::string& getUsername() const;
 	const std::string& getRealname() const;
 	const std::string& getHostname() const;
+	const std::string& getJoinedChannelName() const;
 	bool getHasPassword() const;
 	bool getIsRegistered() const;
+	bool isMemberOfChannel() const;
 	
 	// Setters
 	void setNickname(const std::string& nick);
@@ -51,6 +55,7 @@ class Client
 	void setRegistered(bool status);
 	void updateLastActivity();
 	void setInvalidPasswordAttempt();
+	void setJoinedChannelName(std::string channel_name);
 
 	// Buffer management
 	void appendToBuffer(const std::string& data);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/16 19:59:09 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/16 23:57:49 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ class Server
 	void	pingHandle(Client &client, const std::vector<std::string>& args);
 	void	pongHandle(Client &client, const std::vector<std::string>& args);
 	void	joinHandle(Client &client, const std::vector<std::string>& args);
+	bool	isChannelOperatorCmd(std::string cmd);
+	void	executeKICK(Channel &channel, Client &client, std::string to_kick);
 	public :
 	void	Routine();
 	Server(const int port_,std::string password_);
