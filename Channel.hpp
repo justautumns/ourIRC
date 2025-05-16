@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/15 22:41:51 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/16 19:59:11 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define CHANNEL_HPP
 #include <iostream>
 #include "Client.hpp"
+#include "Server.hpp"
 #include <vector>
 
 // name
@@ -23,6 +24,7 @@
 // restrictions for Topic command
 // connected user limit
 // operators
+class Client;
 
 class Channel
 {
@@ -41,5 +43,22 @@ class Channel
 		void setPw(std::string pass);
 		void setTopic(std::string topic_);
 		void removePass();
+		void addUser(Client* client);
+		void removeUser(Client* client);
+		void addOperator(Client* client);
+		void removeOperator(Client* client);
+		bool isUserInChannel(Client* client) const;
+		bool isOperator(Client* client) const;
+
+		// // Mod ayarları
+		// void setInviteOnly(bool status);
+		// void setTopicRestricted(bool status);
+		// void setUserLimit(size_t limit);
+
+		// Getters
+		const std::string& getName() const;
+		const std::string& getTopic() const;
+		const std::vector<Client*>& getUsers() const;
+		size_t getUserCount() const;
 };
 #endif

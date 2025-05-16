@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 21:58:42 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/16 20:09:59 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ void Server::sendAndReceiveClient(int poll_index)
 	// Process complete commands
 	size_t pos;
 	// "COMMAND1\nCOMMAND2\n" can also bw tried that's why I used a loop but still not sure about \r
-	while ((pos = client->getBuffer().find("\n")) != std::string::npos) 
+	while ((pos = client->getBuffer().find("\r\n")) != std::string::npos) 
 	{
 		std::string command = client->getBuffer().substr(0, pos);
 		client->eraseFromBuffer(0, pos + 2);
@@ -288,13 +288,28 @@ void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
 	const std::string &target = args[0];
 	const std::string &message = args[1];
 
-	// Kanal mesajı için (kanal adları # ile başlar)
-	if (target[0] == '#')
-	{
-		// Kanal işlemleri burada yapılacak
-		// Örnek: broadcastToChannel(target, ":" + client.getNickname() + " PRIVMSG " + target + " :" + message);
-	}
-	else // Kullanıcıya özel mesaj
+	// PRIVMSG to a channel
+		if (target[0] == '#')
+		{
+		Channel* channel = findOrCreateChannel(target);
+		if (channel) {
+			if (!channel->isUserInChannel(&client)) {
+				numericReplies(client.getFd(), ERR_CANNOTSENDTOCHAN, target + " :Cannot send to channel");
+				return;
+			}
+			
+			std::string msg = ":" + client.getNickname() + " PRIVMSG " + target + " :" + message + "\r\n";
+			const std::vector<Client*>& users = channel->getUsers();
+			for (size_t i = 0; i < users.size(); ++i) {
+				if (users[i]->getFd() != client.getFd()) {
+					send(users[i]->getFd(), msg.c_str(), msg.length(), 0);
+				}
+			}
+		} else {
+			numericReplies(client.getFd(), ERR_NOSUCHCHANNEL, target + " :No such channel");
+		}
+	} 
+	else // PRIVMSG to another user
 	{
 		for (size_t i = 0; i < cls.size(); ++i)
 		{
@@ -308,28 +323,160 @@ void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
 		numericReplies(client.getFd(), ERR_NOSUCHNICK, target + " :No such nick/channel");
 	}
 }
-void Server::parseHandleCmd(Client &client, const std::string &command)
+void Server::capHandle(Client &client, const std::vector<std::string>& args)
+{
+	if (!client.getIsRegistered() && args.size() > 0 && args[0] == "LS")
+		send(client.getFd(), "CAP * LS :\r\n", 12, 0);
+}
+
+std::vector<std::string> splitIRCMessage(const std::string& message)
 {
 	std::vector<std::string> args;
-	std::istringstream iss(command);
+	std::istringstream iss(message);
 	std::string arg;
+	bool inTrailing = false;
 
 	while (iss >> arg)
+	{
+		if (!inTrailing && arg[0] == ':')
+		{
+			inTrailing = true;
+			std::string trailingArg;
+			std::getline(iss, trailingArg);
+			arg = arg.substr(1) + trailingArg;
+			args.push_back(arg);
+			break;
+		}
 		args.push_back(arg);
+	}
+	return args;
+}
+void Server::pingHandle(Client &client, const std::vector<std::string>& args)
+{
+	if (args.empty()) {
+		numericReplies(client.getFd(), ERR_NOORIGIN, ":No origin specified");
+	return;
+	}
 
-	if (args.empty()) 
+	// Örnek: PING :123456789 → PONG sunucu_adı :123456789
+	std::string pongMsg = ":" + serverName + " PONG " + serverName + " " + args[0] + "\r\n";
+	send(client.getFd(), pongMsg.c_str(), pongMsg.length(), 0);
+
+	// Just to check event activity
+	client.updateLastActivity();
+}
+
+void Server::pongHandle(Client &client, const std::vector<std::string>& args)
+{
+	(void)args;
+	client.updateLastActivity();
+}
+
+Channel* Server::findOrCreateChannel(const std::string& name)
+{
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
+
+	Channel* newChannel = new Channel(name);
+	channels[name] = newChannel;
+	return newChannel;
+}
+
+void Server::joinHandle(Client &client, const std::vector<std::string>& args)
+{
+	if (!client.getIsRegistered())
+	{
+		numericReplies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
 		return;
+	}
+
+	if (args.empty())
+	{
+		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "JOIN :Not enough parameters");
+		return;
+	}
+
+	std::string channelName = args[0];
+	if (channelName[0] != '#')
+	{
+		numericReplies(client.getFd(), ERR_BADCHANNELKEY, channelName + " :Bad Channel Mask"); // Check replies!!
+		return;
+	}
+
+	// Kanalı bul veya oluştur
+	Channel* channel = findOrCreateChannel(channelName);
+
+	// Kullanıcıyı kanala ekle
+	channel->addUser(&client);
+
+	// Yanıt gönder
+	std::string joinMsg = client.getNickname() + " JOIN " + channelName + "\r\n";
+	send(client.getFd(), joinMsg.c_str(), joinMsg.length(), 0);
+
+	// Kanal konusunu göster
+	if (!channel->getTopic().empty())
+	{
+		numericReplies(client.getFd(), RPL_WELCOME, channelName + " :" + channel->getTopic()); //check replies!!
+	}
+	std::string namesMsg = ":" + serverName + " 353 " + client.getNickname() + " = " + channelName + " :";
+	std::vector<Client*> aa =  channel->getUsers();
+	for (size_t i = 0; i < aa.size(); i++)
+		std::cout << aa[i]->getNickname() << std::endl;
+	namesMsg += "\r\n";
+	send(client.getFd(), namesMsg.c_str(), namesMsg.length(), 0);
+}
+
+void Server::parseHandleCmd(Client &client, const std::string &command)
+{
+	std::vector<std::string> args = splitIRCMessage(command); // Example -> PRIVMSG #channel :Hello, world!
+
+	if (args.empty()) return;
 
 	std::string cmd = args[0];
-	args.erase(args.begin()); // I delete the command from the arguments so in other functions no need to pass the command part
+	args.erase(args.begin());
+
+	std::cout << "Received command: " << cmd;
+	if (!args.empty())
+	{
+		std::cout << " with args: ";
+		for (size_t i = 0; i < args.size(); ++i)
+		{
+			std::cout << "[" << args[i] << "] ";
+		}
+	}
 
 	std::cout << "Received command: " << cmd << " from " << client.getNickname() << std::endl;
 
-	if (cmd == "/PASS") passHandle(client, args);
-	else if (cmd == "/NICK") nickNameHandle(client, args);
-	else if (cmd == "/USER") userHandle(client, args);
-	else if (cmd == "/PRIVMSG") privmsgHandle(client, args);
-	// Diğer komutlar buraya eklenebilir
+	if (cmd == "CAP") capHandle(client, args);
+	else if (cmd == "PASS") passHandle(client, args);
+	else if (cmd == "USER") userHandle(client, args);
+	else if (cmd == "JOIN") joinHandle(client, args);
+	else if (cmd == "NICK") nickNameHandle(client, args);
+	else if (cmd == "PRIVMSG") privmsgHandle(client, args);
+	else if (cmd == "PING") pingHandle(client, args);
+	else if (cmd == "PONG") pongHandle(client, args);
+	else if (cmd == "QUIT")
+	{
+		std::string quitMsg = ":" + client.getNickname() + " QUIT :" + (args.empty() ? "Client quit" : args[0]) + "\r\n";
+		broadcast(quitMsg, client.getFd());
+		removeClient(client.getFd());
+	}
+	else if (cmd == "PART")
+	{
+		if (args.empty())
+		{
+			numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PART :Channel name required");
+		return;
+		}
+		Channel* channel = findOrCreateChannel(args[0]);
+		if (channel)
+		{
+			channel->removeUser(&client);
+			std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
+			send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
+		}
+	}
 	else
 	{
 		//Eğer komut tanınmıyorsa, bunu genel bir mesaj olarak kabul edebiliriz

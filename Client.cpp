@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 21:58:00 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/16 19:59:15 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "Client.hpp"
+#include "Channel.hpp"
 #include <unistd.h>
 
 Client::Client(int fd) : fd(fd), hasPassword(false), isRegistered(false) {}

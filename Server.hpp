@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 21:58:55 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/16 19:59:09 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "Replies.hpp"
 #include "Client.hpp"
+#include "Channel.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -40,6 +41,7 @@
 #define BUFFER_SIZE 1024
 
 class Client;
+class Channel;
 
 class Server 
 {
@@ -51,6 +53,7 @@ class Server
 	static int signal; // for signal function
 	std::vector<Client *> cls;
 	std::vector<struct pollfd>	fd_polls;
+	std::map<std::string, Channel*> channels;
 	
 	//Functions 
 	static void handleSignal(int sig);
@@ -67,13 +70,17 @@ class Server
 	void	broadcast(const std::string& message, int exclude_fd = -1);
 	void	checkClientTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
 	void	privmsgHandle(Client &client, const std::vector<std::string>& args);
-	
+	void	capHandle(Client &client, const std::vector<std::string>& args);
+	void	pingHandle(Client &client, const std::vector<std::string>& args);
+	void	pongHandle(Client &client, const std::vector<std::string>& args);
+	void	joinHandle(Client &client, const std::vector<std::string>& args);
 	public :
 	void	Routine();
 	Server(const int port_,std::string password_);
 	void setupSignals();
 	void startServer();
 	std::string getCreationTime() const;
+	Channel *findOrCreateChannel(const std::string& name);
 	~Server();
 };
 
