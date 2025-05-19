@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/19 16:09:19 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 20:12:52 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,6 @@ class Channel
 	std::string pw;
 	std::string topic;
 	std::string hostName;
-	// bool invite_only;
-	// bool pass_key;
-	// bool user_limit;
 	std::vector<char>modes;
 	int maxUser;
 	std::vector<Client *> ops;
@@ -44,6 +41,7 @@ class Channel
 		~Channel();
 		void setPw(std::string pass);
 		void setTopic(std::string topic_);
+		void setUserLimit(int max_limit);
 		void removePass();
 		void addUser(Client* client);
 		void removeUser(Client* client);
@@ -57,6 +55,7 @@ class Channel
 		// void setTopicRestricted(bool status);
 		// void setUserLimit(size_t limit);
 		void setModes(char x);
+		void removeMode(char x);
 
 		// Getters
 		const std::string& getName() const;

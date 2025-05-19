@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 15:44:35 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 19:17:55 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ class Server
 	void	quitHandle(Client &client, const std::vector<std::string>& args);
 	void	chanComments(Client &client, std::string &cmd, const std::vector<std::string>& args);
 	void	executeKICK(Channel &channel, Client &client, const std::string& to_kick);
-	bool	isChannelOperatorCmd(std::string cmd);
 	public :
 	void	Routine();
 	Server(const int port_,std::string password_);

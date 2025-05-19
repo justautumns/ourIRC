@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/19 16:13:42 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 19:30:16 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,22 @@ Channel::Channel(std::string name_) : name(name_)
 {
 	this->hostName = "ourIrc.sanane.org";
 	this->maxUser = 0;
+	this->topic = "";
 }
 
 void Channel::setPw(std::string pass)
 {
 	this->pw = pass;
-	modes.push_back('k');
 }
 
 void Channel::setTopic(std::string topic_)
 {
 	this->topic = topic_;
+}
+
+void Channel::setUserLimit(int max_limit)
+{
+	this->maxUser = max_limit;
 }
 
 void Channel::addUser(Client *client)
@@ -77,9 +82,24 @@ void Channel::removeOperator(Client *client)
 }
 void Channel::setModes(char x)
 {
-	if (x == 'i' || x == 't' || x == 'k' || x == 'l')
+	// if (x == 'i' || x == 't' || x == 'k' || x == 'l')
+	// {
+	// 	modes.push_back(x);
+	// }
+	if (this->hasMode(x))
+		return;
+	modes.push_back(x);
+}
+
+void Channel::removeMode(char x)
+{
+	for (size_t i = 0; i < modes.size(); i++)
 	{
-		modes.push_back(x);
+		if (modes[i] == x)
+		{
+			modes.erase(modes.begin() + i);
+			return;
+		}
 	}
 }
 

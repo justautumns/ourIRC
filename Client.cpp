@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 14:41:16 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 22:29:00 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,29 @@ bool Client::canRegister() const
 	return !nickname.empty() && !username.empty();
 }
 
-const std::string& Client::getJoinedChannelName() const {return this->joinedChannel;}
-void Client::setJoinedChannelName(std::string channel_name) {this->joinedChannel = channel_name; this->isInChannel = true;}
-bool Client::isMemberOfChannel() const {return this->isInChannel;}
+std::vector<std::string> &Client::getJoinedChannelsName()
+{
+	return (this->joinedChannels);
+}
+
+std::vector<std::string> &Client::getJoinedChannelsName() {return this->invitations;}
+void Client::addJoinedChannel(std::string channel_name) {this->joinedChannels.push_back(channel_name);}
+void Client::addInvitation(std::string channel_name)
+{
+	for (size_t i = 0; i < this->invitations.size(); i++)
+	{
+		if (this->invitations[i].compare(channel_name) == 0)
+			return;
+	}
+	this->invitations.push_back(channel_name);
+}
+
+bool Client::hasInvitation(std::string channel_name)
+{
+	for (size_t i = 0; i < this->invitations.size(); i++)
+	{
+		if (this->invitations[i].compare(channel_name) == 0)
+			return true;
+	}
+	return false;
+}

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ServerComments.cpp                                 :+:      :+:    :+:   */
+/*   ServerCommands.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 15:44:29 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 22:32:10 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,8 +175,16 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 
 	// Kanalı bul veya oluştur
 	Channel* channel = findOrCreateChannel(channelName);
+
+	if (channel->hasMode('i') && !client.hasInvitation(channel->getName()))
+	{
+		std::string inform_msg = "You need an invitaion to join this channel\r\n";
+		send(client.getFd(), inform_msg.c_str(), inform_msg.length(), 0);
+		return;
+	}
+
 	channel->addUser(&client);
-	client.setJoinedChannelName(channelName);
+	client.addJoinedChannel(channelName);
 
 	// 1. JOIN mesajını gönder (RFC 1459 uyumlu)
 	std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " JOIN :" + channelName + "\r\n";
@@ -268,6 +276,17 @@ void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
 }
 void Server::quitHandle(Client &client, const std::vector<std::string>& args)
 {
+	std::vector<std::string> aa = client.getJoinedChannelsName();
+	for (size_t i = 0; i < aa.size(); ++i)
+	{
+		Channel *channel = findChannel(aa[i]);
+		if (channel)
+		{
+			channel->removeUser(&client);
+			std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
+			send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
+		}
+	}
 	for (size_t i = 0; i < fd_polls.size(); ++i)
 	{
 		if (fd_polls[i].fd == client.getFd())

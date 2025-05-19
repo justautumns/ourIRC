@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 00:49:38 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 21:59:01 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ class Client
 	std::string realname;
 	std::string hostname;
 	std::string buffer;
-	std::string joinedChannel; // I believe this has to be also an array.
+	std::vector<std::string> joinedChannels;
+	std::vector<std::string> invitations;
 	time_t last_activity;
 	int invalid_password_attempts;
 	bool hasPassword;
@@ -43,10 +44,11 @@ class Client
 	const std::string& getUsername() const;
 	const std::string& getRealname() const;
 	const std::string& getHostname() const;
-	const std::string& getJoinedChannelName() const;
 	bool getHasPassword() const;
 	bool getIsRegistered() const;
-	bool isMemberOfChannel() const;
+	// bool isMemberOfChannel() const;
+	std::vector<std::string> &getJoinedChannelsName();
+	bool hasInvitation(std::string channel_name);
 	
 	// Setters
 	void setNickname(const std::string& nick);
@@ -55,7 +57,8 @@ class Client
 	void setRegistered(bool status);
 	void updateLastActivity();
 	void setInvalidPasswordAttempt();
-	void setJoinedChannelName(std::string channel_name);
+	void addJoinedChannel(std::string channel_name);
+	void addInvitation(std::string channel_name);
 
 	// Buffer management
 	void appendToBuffer(const std::string& data);

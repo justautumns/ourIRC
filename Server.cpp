@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 15:22:33 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 21:24:13 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ void Server::Routine()
 		{
 			if (fd_polls[i].revents & POLLIN) // here revents are the events that has happend, like POLLIN POLLOUT etc. It is checkin at least one event have happened.
 			{
-				if (fd_polls[i].fd == Fd) 
+				if (fd_polls[i].fd == Fd)
 					addClient(); // we add the client which is new if the socket FD matches that we create in the function up there, I mean the previous function(startServer)
 				else 
 				{
@@ -247,7 +247,8 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 	else if (cmd == "PING") pingHandle(client, args);
 	else if (cmd == "PONG") pongHandle(client, args);
 	else if (cmd == "QUIT") quitHandle(client, args);
-	else if(cmd == "KICK" || cmd == "PART" || cmd == "MODE") chanComments(client, cmd, args);
+	else if(cmd == "KICK" || cmd == "PART" || cmd == "MODE"
+			|| cmd == "INVITE" || cmd == "TOPIC") chanComments(client, cmd, args);
 	else
 	{
 		if (client.getIsRegistered())
