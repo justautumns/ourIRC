@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/16 19:59:11 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/19 16:09:19 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,11 @@ class Channel
 	std::string name;
 	std::string pw;
 	std::string topic;
-	bool invite_only;
-	bool pass_key;
-	bool user_limit;
+	std::string hostName;
+	// bool invite_only;
+	// bool pass_key;
+	// bool user_limit;
+	std::vector<char>modes;
 	int maxUser;
 	std::vector<Client *> ops;
 	std::vector<Client *> channelUsers;
@@ -54,11 +56,17 @@ class Channel
 		// void setInviteOnly(bool status);
 		// void setTopicRestricted(bool status);
 		// void setUserLimit(size_t limit);
+		void setModes(char x);
 
 		// Getters
 		const std::string& getName() const;
 		const std::string& getTopic() const;
+		std::string& getHostName();
 		const std::vector<Client*>& getUsers() const;
 		size_t getUserCount() const;
+		void broadcast(const std::string& message, Client *ptr);
+		void broadcast1(const std::string& message, Client *ptr);
+		bool hasMode(char x);
+
 };
 #endif

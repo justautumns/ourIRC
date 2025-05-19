@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/16 21:55:44 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/19 00:49:38 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class Client
 	std::string realname;
 	std::string hostname;
 	std::string buffer;
-	std::string joinedChannel;
+	std::string joinedChannel; // I believe this has to be also an array.
 	time_t last_activity;
 	int invalid_password_attempts;
 	bool hasPassword;

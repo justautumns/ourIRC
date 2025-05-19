@@ -3,13 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/16 21:56:29 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/19 14:41:16 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "Client.hpp"
 #include "Channel.hpp"
@@ -123,7 +122,8 @@ bool Client::shouldDisconnect() const
 }
 bool Client::canRegister() const
 {
-	return hasPassword && !getNickname().empty() && !getUsername().empty();
+	//return hasPassword && !getNickname().empty() && !getUsername().empty();
+	return !nickname.empty() && !username.empty();
 }
 
 const std::string& Client::getJoinedChannelName() const {return this->joinedChannel;}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/16 23:57:49 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/19 15:44:35 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Server
 	std::vector<Client *> cls;
 	std::vector<struct pollfd>	fd_polls;
 	std::map<std::string, Channel*> channels;
+	bool isCap;
 	
 	//Functions 
 	static void handleSignal(int sig);
@@ -62,7 +63,7 @@ class Server
 	void	removeClient(int poll_index);
 
 	// Client commands
-	void	numericReplies(int fd, int code, const std::string &msj) const;
+	void	Replies(int fd, int code, const std::string &msj) const;
 	void	parseHandleCmd(Client &client, const std::string &cmd);
 	void	passHandle(Client &client, const std::vector<std::string> &arguments);
 	void	nickNameHandle(Client &client, const std::vector<std::string> &arguments);
@@ -74,8 +75,10 @@ class Server
 	void	pingHandle(Client &client, const std::vector<std::string>& args);
 	void	pongHandle(Client &client, const std::vector<std::string>& args);
 	void	joinHandle(Client &client, const std::vector<std::string>& args);
+	void	quitHandle(Client &client, const std::vector<std::string>& args);
+	void	chanComments(Client &client, std::string &cmd, const std::vector<std::string>& args);
+	void	executeKICK(Channel &channel, Client &client, const std::string& to_kick);
 	bool	isChannelOperatorCmd(std::string cmd);
-	void	executeKICK(Channel &channel, Client &client, std::string to_kick);
 	public :
 	void	Routine();
 	Server(const int port_,std::string password_);
@@ -83,6 +86,8 @@ class Server
 	void startServer();
 	std::string getCreationTime() const;
 	Channel *findOrCreateChannel(const std::string& name);
+	Channel *findChannel(const std::string& name);
+	Client *findClientByNick(const std::string &kc);
 	~Server();
 };
 

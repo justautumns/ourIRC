@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/17 00:16:35 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/19 15:22:33 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,153 +181,8 @@ std::string Server::getCreationTime() const
 	strftime(buf, sizeof(buf), "%a %b %d %Y at %H:%M:%S", localtime(&now));
 	return buf;
 }
-void Server::nickNameHandle(Client& client, const std::vector<std::string> &args)
-{
-	if (args.empty())
-	{
-		numericReplies(client.getFd(), ERR_NONICKNAMEGIVEN, ":No nickname given");
-		return;
-	}
 
-	const std::string &newNick = args[0];
 
-	// Nickname validation according to RFC 1459 it's really gettin started to be pain to check this documentary :/
-	// BTW this numericReplies was also in these documentary
-	if (newNick.empty() || newNick.length() > 9)
-	{
-		numericReplies(client.getFd(), ERR_ERRONEUSNICKNAME, newNick + " :Erroneous nickname");
-		return;
-	}
-
-	// This chars are considered as invalid in a nickname
-	if (newNick.find_first_of(" ,*?!@.") != std::string::npos)
-	{
-		numericReplies(client.getFd(), ERR_ERRONEUSNICKNAME, newNick + " :Erroneous nickname (a nickname cannot contain these charecters ;  ,*?!@.)");
-		return;
-	}
-
-	// Checking if nickname is already in use
-	for (size_t i = 0; i < cls.size(); ++i)
-	{
-		if (cls[i]->getNickname() == newNick && cls[i]->getFd() != client.getFd())
-		{
-			numericReplies(client.getFd(), ERR_NICKNAMEINUSE, newNick + " :Nickname is already in use");
-			return;
-		}
-	}
-
-	client.setNickname(newNick);
-	if (client.getIsRegistered())
-	{
-		std::string msg = client.getNickname() + " NICK :" + newNick + "\r\n";
-		broadcast(client.getNickname() + " NICK :" + newNick);
-	}
-
-	// If all goes well it means registiration was a success and we send a welcome msg
-	if (!client.getIsRegistered() && client.canRegister())
-	{
-		client.setRegistered(true);
-		numericReplies(client.getFd(), RPL_WELCOME, ":Welcome to the Internet Relay Network " + client.getNickname());
-	}
-}
-
-void Server::userHandle(Client &client, const std::vector<std::string>& args)
-{
-	if (client.getIsRegistered())
-	{
-		numericReplies(client.getFd(), ERR_ALREADYREGISTERED, ":You may not reregister");
-		return;
-	}
-
-	if (args.size() < 4)
-	{
-		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "USER :Not enough parameters");
-		return;
-	}
-
-	const std::string &username = args[0];
-	// args[1] and args[2] are (hostname ve servername) in IRC it's kind of ignored, so user dont have to set those things 
-	// Therefore we pass 0 * hostname is 0 and server name is * but we can also set these things IDK.
-	// for realname I add this loop to grep spaces in between names.
-	std::string realname = args[3];
-	for (size_t i = 4; i < args.size(); ++i)
-		realname += " " + args[i];
-
-	// But in username it has to be one word so..
-	if (username.empty() || username.find(' ') != std::string::npos)
-	{
-		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "USER :Invalid username");
-		return;
-	}
-
-	client.setUserInfo(username, realname);
-
-	if (!client.getIsRegistered() && client.canRegister())
-	{
-		client.setRegistered(true);
-		numericReplies(client.getFd(), RPL_WELCOME, ":Welcome to the Internet Relay Network " + client.getNickname());
-		numericReplies(client.getFd(), RPL_YOURHOST, ":Your host is " + serverName);
-		numericReplies(client.getFd(), RPL_CREATED, ":This server was created by Emre and Michal at: " + getCreationTime());
-	}
-}
-
-void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
-{
-	if (!client.getIsRegistered())
-	{
-		numericReplies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
-		return;
-	}
-
-	if (args.size() < 2)
-	{
-		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PRIVMSG :Not enough parameters");
-		return;
-	}
-
-	const std::string &target = args[0];
-	const std::string &message = args[1];
-
-	// PRIVMSG to a channel
-		if (target[0] == '#')
-		{
-		Channel* channel = findOrCreateChannel(target);
-		if (channel) {
-			if (!channel->isUserInChannel(&client)) {
-				numericReplies(client.getFd(), ERR_CANNOTSENDTOCHAN, target + " :Cannot send to channel");
-				return;
-			}
-			
-			std::string msg = ":" + client.getNickname() + " PRIVMSG " + target + " :" + message + "\r\n";
-			const std::vector<Client*>& users = channel->getUsers();
-			for (size_t i = 0; i < users.size(); ++i) {
-				if (users[i]->getFd() != client.getFd()) {
-					send(users[i]->getFd(), msg.c_str(), msg.length(), 0);
-				}
-			}
-		} else {
-			numericReplies(client.getFd(), ERR_NOSUCHCHANNEL, target + " :No such channel");
-		}
-	} 
-	else // PRIVMSG to another user
-	{
-		for (size_t i = 0; i < cls.size(); ++i)
-		{
-			if (cls[i]->getNickname() == target)
-			{
-				std::string msg = client.getNickname() + " :" + message + "\r\n";
-				send(cls[i]->getFd(), msg.c_str(), msg.length(), 0);
-				return;
-			}
-		}
-		numericReplies(client.getFd(), ERR_NOSUCHNICK, target + " :No such nick/channel");
-	}
-}
-void Server::capHandle(Client &client, const std::vector<std::string>& args)
-{
-	if (!client.getIsRegistered() && args.size() > 0 && args[0] == "LS")
-		send(client.getFd(), "CAP * LS :\r\n", 12, 0);
-}
 
 std::vector<std::string> splitIRCMessage(const std::string& message)
 {
@@ -351,26 +206,7 @@ std::vector<std::string> splitIRCMessage(const std::string& message)
 	}
 	return args;
 }
-void Server::pingHandle(Client &client, const std::vector<std::string>& args)
-{
-	if (args.empty()) {
-		numericReplies(client.getFd(), ERR_NOORIGIN, ":No origin specified");
-	return;
-	}
 
-	// Örnek: PING :123456789 → PONG sunucu_adı :123456789
-	std::string pongMsg = ":" + serverName + " PONG " + serverName + " " + args[0] + "\r\n";
-	send(client.getFd(), pongMsg.c_str(), pongMsg.length(), 0);
-
-	// Just to check event activity
-	client.updateLastActivity();
-}
-
-void Server::pongHandle(Client &client, const std::vector<std::string>& args)
-{
-	(void)args;
-	client.updateLastActivity();
-}
 
 Channel* Server::findOrCreateChannel(const std::string& name)
 {
@@ -382,164 +218,49 @@ Channel* Server::findOrCreateChannel(const std::string& name)
 	channels[name] = newChannel;
 	return newChannel;
 }
-
-void Server::joinHandle(Client &client, const std::vector<std::string>& args)
+Channel* Server::findChannel(const std::string& name)
 {
-	if (!client.getIsRegistered())
-	{
-		numericReplies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
-		return;
-	}
-
-	if (args.empty())
-	{
-		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "JOIN :Not enough parameters");
-		return;
-	}
-
-	std::string channelName = args[0];
-	if (channelName[0] != '#')
-	{
-		numericReplies(client.getFd(), ERR_BADCHANNELKEY, channelName + " :Bad Channel Mask"); // Check replies!!
-		return;
-	}
-
-	// Kanalı bul veya oluştur
-	Channel* channel = findOrCreateChannel(channelName);
-
-	// Kullanıcıyı kanala ekle
-	channel->addUser(&client);
-	client.setJoinedChannelName(channelName);
-
-	// Yanıt gönder
-	std::string joinMsg = client.getNickname() + " JOIN " + channelName + "\r\n";
-	send(client.getFd(), joinMsg.c_str(), joinMsg.length(), 0);
-
-	// Kanal konusunu göster
-	if (!channel->getTopic().empty())
-	{
-		numericReplies(client.getFd(), RPL_WELCOME, channelName + " :" + channel->getTopic()); //check replies!!
-	}
-	std::string namesMsg = ":" + serverName + " 353 " + client.getNickname() + " = " + channelName + " :";
-	std::vector<Client*> aa =  channel->getUsers();
-	for (size_t i = 0; i < aa.size(); i++)
-		std::cout << aa[i]->getNickname() << std::endl;
-	namesMsg += "\r\n";
-	send(client.getFd(), namesMsg.c_str(), namesMsg.length(), 0);
-}
-
-bool	Server::isChannelOperatorCmd(std::string cmd)
-{
-	if (cmd.compare("KICK") == 0 || cmd.compare("INVITE") == 0 || cmd.compare("TOPIC") == 0 || cmd.compare("MODE") == 0)
-		return true;
-	return false;
-}
-
-void	Server::executeKICK(Channel &channel, Client &client, std::string to_kick)
-{
-	std::cout << client.getNickname() << " kicked out " << to_kick << " from " << channel.getName() << "\n";
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
+	return NULL;
 }
 
 void Server::parseHandleCmd(Client &client, const std::string &command)
 {
-	std::vector<std::string> args = splitIRCMessage(command); // Example -> PRIVMSG #channel :Hello, world!
+	std::vector<std::string> args = splitIRCMessage(command);
 
 	if (args.empty()) return;
 
 	std::string cmd = args[0];
 	args.erase(args.begin());
 
-	std::cout << "Received command: " << cmd;
-	if (!args.empty())
-	{
-		std::cout << " with args: ";
-		for (size_t i = 0; i < args.size(); ++i)
-		{
-			std::cout << "[" << args[i] << "] ";
-		}
-	}
-
-	std::cout << "Received command: " << cmd << " from " << client.getNickname() << std::endl;
-
 	for (size_t i = 0; i < cmd.size(); i++)
 		cmd[i] = std::toupper(cmd[i]);
 
-	if (cmd == "CAP") capHandle(client, args);
-	else if (cmd == "PASS") passHandle(client, args);
+	if (cmd == "PASS") passHandle(client, args);
+	else if (cmd == "CAP") capHandle(client, args);
+	else if (cmd == "NICK") nickNameHandle(client, args);
 	else if (cmd == "USER") userHandle(client, args);
 	else if (cmd == "JOIN") joinHandle(client, args);
-	else if (cmd == "NICK") nickNameHandle(client, args);
-	else if (cmd == "PRIVMSG") privmsgHandle(client, args);
+	else if (cmd == "PRIVMSG" || cmd == "MSG") privmsgHandle(client, args);
 	else if (cmd == "PING") pingHandle(client, args);
 	else if (cmd == "PONG") pongHandle(client, args);
-	// else if (cmd == "QUIT")
-	// {
-	// 	std::string quitMsg = ":" + client.getNickname() + " QUIT :" + (args.empty() ? "Client quit" : args[0]) + "\r\n";
-	// 	broadcast(quitMsg, client.getFd());
-	// 	removeClient(client.getFd());
-	// }
-	// else if (cmd == "PART")
-	// {
-	// 	if (args.empty())
-	// 	{
-	// 		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PART :Channel name required");
-	// 		return;
-	// 	}
-	// 	Channel* channel = findOrCreateChannel(args[0]);
-	// 	if (channel)
-	// 	{
-	// 		channel->removeUser(&client);
-	// 		std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
-	// 		send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
-	// 	}
-	// }
-	else if (isChannelOperatorCmd(cmd))
-	{
-		if (!client.isMemberOfChannel())
-			return (numericReplies(client.getFd(), ERR_NOTONCHANNEL, "You are not in a channel"));
-			
-		else if (cmd == "KICK")
-		{
-			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
-			if (it != channels.end() && it->second->isOperator(&client))
-				executeKICK(*(it->second), client, args[2]);
-		}
-		else if (cmd == "INVITE")
-		{
-			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
-			if (it != channels.end() && it->second->isOperator(&client))
-				// execute INVITE command
-				return;
-		}
-		else if (cmd == "TOPIC")
-		{
-			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
-			if (it != channels.end() && it->second->isOperator(&client))
-				// execute TOPIC command
-				return;
-		}
-		else
-		{
-			std::map<std::string, Channel*>::iterator it = channels.find(args[0]);
-			if (it != channels.end() && it->second->isOperator(&client))
-				// execute MODE command
-				return;
-		}
-	}
+	else if (cmd == "QUIT") quitHandle(client, args);
+	else if(cmd == "KICK" || cmd == "PART" || cmd == "MODE") chanComments(client, cmd, args);
 	else
 	{
-		//Eğer komut tanınmıyorsa, bunu genel bir mesaj olarak kabul edebiliriz
 		if (client.getIsRegistered())
 		{
-			std::string msg = client.getNickname() + " :" + command + "\r\n";
+			std::string msg = client.getNickname() + " :" + cmd + "\r\n";
 			broadcast(msg, client.getFd());
 		}
 		else
-			numericReplies(client.getFd(), ERR_UNKNOWNCOMMAND, cmd + " :Unknown command");
+			Replies(client.getFd(), ERR_UNKNOWNCOMMAND, cmd + " :Unknown command");
 	}
 }
 
-void Server::numericReplies(int fd, int code, const std::string &message) const
+void Server::Replies(int fd, int code, const std::string &message) const
 {
 	std::stringstream reply;
 	reply << serverName << " " << std::setw(3) << std::setfill('0')
@@ -547,43 +268,7 @@ void Server::numericReplies(int fd, int code, const std::string &message) const
 	send(fd, reply.str().c_str(), reply.str().length(), 0);
 }
 
-void Server::passHandle(Client &client, const std::vector<std::string>& args)
-{
-	if (client.getIsRegistered())
-	{
-		numericReplies(client.getFd(), ERR_ALREADYREGISTERED, ":You may not reregister");
-		return;
-	}
 
-	if (args.empty())
-	{
-		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PASS :Not enough parameters");
-		return;
-	}
-	if (args[0].find(' ') != std::string::npos)
-	{
-		numericReplies(client.getFd(), ERR_NEEDMOREPARAMS, "PASS :Password may not contain spaces");
-		return;
-	}
-	if (args[0] == passwd)
-	{
-		client.setPassword(true);
-		numericReplies(client.getFd(), RPL_WELCOME, ":Password accepted");
-	} 
-	else
-	{
-		numericReplies(client.getFd(), ERR_PASSWDMISMATCH, ":Password incorrect");
-		// We have to find and disconnect this client
-		for (size_t i = 0; i < fd_polls.size(); ++i)
-		{
-			if (fd_polls[i].fd == client.getFd())
-			{
-				removeClient(i);
-				break;
-			}
-		}
-	}
-}
 // void Server::checkClientTimeouts()
 // {
 // 	for (size_t i = 0; i < cls.size(); ++i)

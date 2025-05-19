@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   replies.hpp                                        :+:      :+:    :+:   */
+/*   Replies.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:18:50 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 21:50:28 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/19 15:20:36 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,5 +39,22 @@
 #define ERR_INVITEONLYCHAN 473
 #define ERR_BADCHANNELKEY 475
 #define ERR_CHANOPRIVSNEEDED 482
+// Server Replies (RFC 1459 Section 6.1)
+#define RPL_MYINFO 004
+#define RPL_ISUPPORT 005
+
+// Channel Related (RFC 1459 Section 6.2)
+#define RPL_TOPIC 332  // Kanal konusu gönderildiğinde
+#define RPL_TOPICWHOTIME 333  // Konuyu kimin ne zaman değiştirdiği (opsiyonel)
+#define RPL_NAMREPLY 353  // Kanaldaki kullanıcı listesi
+#define RPL_ENDOFNAMES 366  // Kullanıcı listesi sonu
+
+// Error Replies (RFC 1459 Section 6.3)
+#define ERR_NOSUCHCHANNEL   403  // Kanal bulunamadı
+#define ERR_TOOMANYCHANNELS 405  // Çok fazla kanala katılım
+#define ERR_BADCHANNELKEY   475  // Yanlış kanal şifresi
+#define ERR_CHANNELISFULL   471  // Kanal dolu
+#define ERR_INVITEONLYCHAN  473  // Sadece davetli kanal
+
 
 #endif
