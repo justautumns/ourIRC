@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 01:13:34 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 23:40:06 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,18 +95,31 @@ void Server::nickNameHandle(Client& client, const std::vector<std::string> &args
 	{
 		if (cls[i]->getNickname() == newNick && cls[i]->getFd() != client.getFd())
 		{
-			Replies(client.getFd(), ERR_NICKNAMEINUSE, newNick + " :Nickname is already in use");
+			Replies(client.getFd(), ERR_NICKNAMEINUSE, client.getNickname() + " " + newNick + " :Nickname is already in use");
 			return;
 		}
 	}
 
+	std::string old_nick = client.getNickname();
 	client.setNickname(newNick);
 	if (client.getIsRegistered())
 	{
-		std::string msg = client.getNickname() + " NICK :" + newNick + "\r\n";
-		broadcast(client.getNickname() + " NICK :" + newNick);
+		std::string msg = ":" + old_nick + "!" + client.getUsername() + "@" + client.getHostname() + " NICK :" + newNick + "\r\n";
+		std::vector<std::string> channels = client.getJoinedChannelsName();
+		if (channels.size() != 0)
+		{
+			for (size_t i = 0; i < channels.size(); i++)
+			{
+				Channel *cur_chan = findChannel(channels[i]);
+				if (cur_chan)
+					cur_chan->broadcast(msg);
+			}
+		}
+		else
+			send(client.getFd(), msg.c_str(), msg.size(), 0);
 	}
 
+	// /connect localhost 3555 pass
 	// If all goes well it means registiration was a success and we send a welcome msg
 	if (!client.getIsRegistered() && client.canRegister())
 	{
@@ -198,7 +211,7 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 
 	// 1. JOIN mesajını gönder (RFC 1459 uyumlu)
 	std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " JOIN :" + channelName + "\r\n";
-	channel->broadcast(joinMsg, &client);
+	channel->broadcast(joinMsg);
 
 	// 2. Kanal konusu (RPL_TOPIC 332)
 	if (!channel->getTopic().empty())
@@ -317,7 +330,8 @@ void Server::pingHandle(Client &client, const std::vector<std::string>& args)
 	}
 
 	// Örnek: PING :123456789 → PONG sunucu_adı :123456789
-	std::string pongMsg = ":" + serverName + " PONG " + serverName + " " + args[0] + "\r\n";
+	// std::string pongMsg = ":" + serverName + " PONG " + serverName + " " + args[0] + "\r\n";
+	std::string pongMsg = ":" + serverName + " PONG " + args[0] + "\r\n";
 	send(client.getFd(), pongMsg.c_str(), pongMsg.length(), 0);
 
 	// Just to check event activity

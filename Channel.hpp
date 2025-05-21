@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/19 20:12:52 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 21:59:46 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ class Channel
 		std::string& getHostName();
 		const std::vector<Client*>& getUsers() const;
 		size_t getUserCount() const;
-		void broadcast(const std::string& message, Client *ptr);
+		void broadcast(const std::string& message);
 		void broadcast1(const std::string& message, Client *ptr);
 		bool hasMode(char x);
 

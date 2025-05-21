@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.cpp                                         :+:      :+:    :+:   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 00:58:26 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 20:49:26 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 		if (client.getIsRegistered())
 		{
 			std::string msg = client.getNickname() + " :" + cmd + "\r\n";
-			broadcast(msg, client.getFd());
+			// broadcast(msg, client.getFd());
 		}
 		else
 			Replies(client.getFd(), ERR_UNKNOWNCOMMAND, cmd + " :Unknown command");
@@ -309,7 +309,7 @@ void Server::removeClient(int poll_index)
 	{
 		if (cls[i]->getFd() == client_fd)
 		{
-			broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
+			// broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
 			cls.erase(cls.begin() + i);
 			break;
 		}

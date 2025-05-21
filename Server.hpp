@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 19:17:55 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 18:54:42 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <iomanip>
 #include <ctime>
+#include <cstdlib>
 
 #define MAX_CLIENT 50
 #define BUFFER_SIZE 1024

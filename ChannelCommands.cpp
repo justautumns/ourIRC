@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 22:29:13 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 22:11:04 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 
 	if (!channel)
 	{
+		if (args[0].compare(client.getNickname()) == 0)
+			return;
 		Replies(client.getFd(), ERR_NOSUCHCHANNEL, args[1] + " :No such channel");
 		return;
 	}
@@ -135,9 +137,9 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		channel->setTopic(newTopic);
 
 		// IRC protokolüne uygun mesaj formatı
-		std::string topicMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + 
+		std::string topicMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + 
 								" TOPIC " + channelName + " :" + newTopic + "\r\n";
-		channel->broadcast(topicMsg, &client);
+		channel->broadcast(topicMsg);
 	}
 
 	else if (cmd == "PART")
