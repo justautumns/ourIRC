@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 22:32:10 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 01:13:34 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void Server::capHandle(Client &client, const std::vector<std::string>& args)
 		std::string reply = "CAP * LS :\r\n";
 		send(client.getFd(), reply.c_str(), reply.size(), 0);
 	}
+	if (!args.empty() && args[0] == "END")
+		client.set_cap_end(true);
 }
 void Server::passHandle(Client &client, const std::vector<std::string>& args)
 {
@@ -44,7 +46,9 @@ void Server::passHandle(Client &client, const std::vector<std::string>& args)
 	if (args[0] == passwd)
 	{
 		client.setPassword(true);
-		Replies(client.getFd(), RPL_WELCOME, ":Password accepted");
+		// Replies(client.getFd(), RPL_WELCOME, ":Password accepted");
+		std::string reply = "Password accepted\r\n";
+		send(client.getFd(), reply.c_str(), reply.size(), 0);
 	} 
 	else
 	{
@@ -107,7 +111,7 @@ void Server::nickNameHandle(Client& client, const std::vector<std::string> &args
 	if (!client.getIsRegistered() && client.canRegister())
 	{
 		client.setRegistered(true);
-		Replies(client.getFd(), RPL_WELCOME, ":Welcome to the Internet Relay Network " + client.getNickname());
+		// Replies(client.getFd(), RPL_WELCOME, ":Welcome to the Internet Relay Network " + client.getNickname());
 	}
 }
 
@@ -145,24 +149,30 @@ void Server::userHandle(Client &client, const std::vector<std::string>& args)
 	if (!client.getIsRegistered() && client.canRegister())
 	{
 		client.setRegistered(true);
-		Replies(client.getFd(), RPL_WELCOME, ":Welcome to the Internet Relay Network " + client.getNickname());
-		Replies(client.getFd(), RPL_YOURHOST, ":Your host is " + serverName);
-		Replies(client.getFd(), RPL_CREATED, ":This server was created by Emre and Michal at: " + getCreationTime());
+		Replies(client.getFd(), RPL_WELCOME, client.getNickname() + " :Welcome to the Internet Relay Network " + client.getNickname());
+		Replies(client.getFd(), RPL_YOURHOST, client.getNickname() + " :Your host is " + serverName);
+		Replies(client.getFd(), RPL_CREATED, client.getNickname() + " :This server was created by Emre and Michal at: " + getCreationTime());
+		Replies(client.getFd(), RPL_MYINFO, client.getNickname() + " " + serverName + " 1.0 usrmd lktoi");
+		// std::stringstream reply;
+		// reply << ":" << serverName << " MODE " << client.getNickname() << " +i \r\n";
+		// send(client.getFd(), reply.str().c_str(), reply.str().length(), 0);
+		// Replies(client.getFd(), 422, client.getNickname() + " :MOTD File is missing");
 	}
 }
 
 
 void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 {
-	if (!client.getIsRegistered())
-	{
-		Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
-		return;
-	}
-
 	if (args.empty())
 	{
 		Replies(client.getFd(), ERR_NEEDMOREPARAMS, "JOIN :Not enough parameters");
+		return;
+	}
+	
+	if (!client.getIsRegistered())
+	{
+		if (client.is_cap_end_received())
+			Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
 		return;
 	}
 

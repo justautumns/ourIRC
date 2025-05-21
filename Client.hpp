@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Client.hpp                                         :+:      :+:    :+:   */
+/*   client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 21:59:01 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 00:05:06 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class Client
 {
 	private:
 	int fd;
+	bool got_cap_end;
 	std::string nickname;
 	std::string username;
 	std::string realname;
@@ -46,7 +47,6 @@ class Client
 	const std::string& getHostname() const;
 	bool getHasPassword() const;
 	bool getIsRegistered() const;
-	// bool isMemberOfChannel() const;
 	std::vector<std::string> &getJoinedChannelsName();
 	bool hasInvitation(std::string channel_name);
 	
@@ -69,6 +69,8 @@ class Client
 	// Registration check
 	bool canRegister() const;
 	bool shouldDisconnect() const;
+	bool is_cap_end_received();
+	void set_cap_end(bool status);
 	
 	~Client();
 };

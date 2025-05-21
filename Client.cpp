@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 22:29:00 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 00:05:39 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ Client::Client(int fd)
 	this->hasPassword = false;
 	this->isRegistered = false;
 	this->isInChannel = false;
+	this->got_cap_end = false;
 }
 
 Client::~Client()
@@ -131,7 +132,7 @@ std::vector<std::string> &Client::getJoinedChannelsName()
 	return (this->joinedChannels);
 }
 
-std::vector<std::string> &Client::getJoinedChannelsName() {return this->invitations;}
+// std::vector<std::string> &Client::getJoinedChannelsName() {return this->invitations;}
 void Client::addJoinedChannel(std::string channel_name) {this->joinedChannels.push_back(channel_name);}
 void Client::addInvitation(std::string channel_name)
 {
@@ -152,3 +153,6 @@ bool Client::hasInvitation(std::string channel_name)
 	}
 	return false;
 }
+
+bool Client::is_cap_end_received() {return this->got_cap_end;}
+void Client::set_cap_end(bool status) {this->got_cap_end = status;}

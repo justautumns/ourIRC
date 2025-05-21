@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
+/*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 21:24:13 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/21 00:58:26 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 int Server::signal = 0;
 Server::Server(const int port_, std::string password_) : port(port_) , passwd(password_)
 {
-	serverName = " IRC Server by Emre & Michal";
+	// serverName = " IRC Server by Emre & Michal";
+	serverName = "irc.em.org";
 	setupSignals();
 }
 
@@ -228,6 +229,7 @@ Channel* Server::findChannel(const std::string& name)
 
 void Server::parseHandleCmd(Client &client, const std::string &command)
 {
+	std::cout << "Received: '" << command << "'\n";
 	std::vector<std::string> args = splitIRCMessage(command);
 
 	if (args.empty()) return;
@@ -264,7 +266,7 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 void Server::Replies(int fd, int code, const std::string &message) const
 {
 	std::stringstream reply;
-	reply << serverName << " " << std::setw(3) << std::setfill('0')
+	reply << ":" << serverName << " " << std::setw(3) << std::setfill('0')
 			<< code << " " << message << "\r\n";
 	send(fd, reply.str().c_str(), reply.str().length(), 0);
 }
