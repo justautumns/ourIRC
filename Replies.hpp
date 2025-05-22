@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Replies.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:18:50 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/19 15:20:36 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/22 23:25:32 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@
 #define RPL_TOPICWHOTIME 333  // Konuyu kimin ne zaman değiştirdiği (opsiyonel)
 #define RPL_NAMREPLY 353  // Kanaldaki kullanıcı listesi
 #define RPL_ENDOFNAMES 366  // Kullanıcı listesi sonu
+#define RPL_INVITING 341 // confirmation that the invitation to a channel has been sent
 
 // Error Replies (RFC 1459 Section 6.3)
 #define ERR_NOSUCHCHANNEL   403  // Kanal bulunamadı

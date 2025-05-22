@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/22 01:23:27 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/22 22:40:26 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ Server::Server(const int port_, std::string password_) : port(port_) , passwd(pa
 {
 	// serverName = " IRC Server by Emre & Michal";
 	serverName = "irc.em.org";
+	client_removed = false;
 	setupSignals();
 }
 
@@ -94,6 +95,12 @@ void Server::Routine()
 		else if (signal)
 		{
 			std::cout << "Server shutting down..." << std::endl;
+			if (cls.size() > 0)
+			{
+				for (size_t i = 0; i < cls.size(); ++i)
+					delete cls[i];
+			}
+			cls.clear();
 			break;
 		}
 		
@@ -137,6 +144,7 @@ void Server::addClient()
 	struct pollfd new_poll;
 	new_poll.fd = client_fd;
 	new_poll.events = POLLIN;
+	new_poll.revents = 0;
 	fd_polls.push_back(new_poll);
 
 	// push back new client I just didn't get back to using stack actually I also get error I tried
@@ -166,7 +174,7 @@ void Server::sendAndReceiveClient(int poll_index)
 	// Process complete commands
 	size_t pos;
 	// "COMMAND1\nCOMMAND2\n" can also bw tried that's why I used a loop but still not sure about \r
-	while ((pos = client->getBuffer().find("\r\n")) != std::string::npos) 
+	while (client_removed == false && (pos = client->getBuffer().find("\r\n")) != std::string::npos) 
 	{
 		std::string command = client->getBuffer().substr(0, pos);
 		client->eraseFromBuffer(0, pos + 2);
@@ -320,6 +328,7 @@ void Server::removeClient(int poll_index)
 				}
 			}
 			broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
+			delete cls[i];
 			cls.erase(cls.begin() + i);
 			break;
 		}
@@ -327,6 +336,7 @@ void Server::removeClient(int poll_index)
 
 	fd_polls.erase(fd_polls.begin() + poll_index);
 	std::cout << "Client removed. FD: " << client_fd << std::endl;
+	client_removed = true;
 }
 
 void Server::handleSignal(int sig)

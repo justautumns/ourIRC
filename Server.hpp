@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 18:54:42 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/22 22:38:12 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Channel;
 class Server 
 {
 	private :
+	bool client_removed;
 	std::string	serverName;
 	int port;
 	std::string passwd;
@@ -78,7 +79,7 @@ class Server
 	void	joinHandle(Client &client, const std::vector<std::string>& args);
 	void	quitHandle(Client &client, const std::vector<std::string>& args);
 	void	chanComments(Client &client, std::string &cmd, const std::vector<std::string>& args);
-	void	executeKICK(Channel &channel, Client &client, const std::string& to_kick);
+	void	executeKICK(Channel &channel, Client &client, const std::string& to_kick, std::string reason);
 	public :
 	void	Routine();
 	Server(const int port_,std::string password_);

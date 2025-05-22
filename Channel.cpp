@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/22 02:06:13 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/22 22:16:59 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,12 +138,7 @@ bool Channel::isOperator(Client *client) const
 void Channel::broadcast(const std::string& message)
 {
 	for (size_t i = 0; i < channelUsers.size(); ++i)
-	{
-		std::cout << "Broadcasting to -> " << channelUsers[i]->getNickname() << " FD: " << channelUsers[i]->getFd() << "\n";
-		std::string test_msg = "You're about to receive a message -> " + message;
-		send(channelUsers[i]->getFd(), test_msg.c_str(), test_msg.length(), 0);
 		send(channelUsers[i]->getFd(), message.c_str(), message.length(), 0);
-	}
 }
 
 void Channel::broadcast1(const std::string& message, Client *ptr)
@@ -176,6 +171,14 @@ const std::vector<Client*>& Channel::getUsers() const
 size_t Channel::getUserCount() const
 {
 	return channelUsers.size();
+}
+
+int Channel::getOperatorCount() {return this->ops.size();}
+
+std::string Channel::promoteToOP_andReturnNick()
+{
+	addOperator(this->channelUsers[0]);
+	return this->channelUsers[0]->getNickname();
 }
 
 void Channel::removePass()

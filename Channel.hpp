@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/22 01:23:30 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/22 22:16:42 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ class Channel
 		// void setUserLimit(size_t limit);
 		void setModes(char x);
 		void removeMode(char x);
+		std::string promoteToOP_andReturnNick();
 
 		// Getters
 		const std::string& getName() const;
@@ -63,6 +64,7 @@ class Channel
 		std::string& getHostName();
 		const std::vector<Client*>& getUsers() const;
 		size_t getUserCount() const;
+		int getOperatorCount();
 		void broadcast(const std::string& message);
 		void broadcast1(const std::string& message, Client *ptr);
 		bool hasMode(char x);
