@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 23:40:06 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/22 16:28:55 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,17 +222,15 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 	// 3. Kullanıcı listesi (RPL_NAMREPLY 353)
 	std::string userList;
 	const std::vector<Client*>& users = channel->getUsers();
+	if (users.size() == 1)
+		channel->addOperator(&client);
 	for (size_t i = 0; i < users.size(); ++i)
 	{
 		if (i > 0) userList += " ";
-		userList += (channel->isOperator(users[i]) ? "@" : "") + users[i]->getNickname();
+		userList += std::string(channel->isOperator(users[i]) ? "@" : "") + users[i]->getNickname();
 	}
-	Replies(client.getFd(), RPL_NAMREPLY, "= " + channelName + " :" + userList);
-
-	Replies(client.getFd(), RPL_ENDOFNAMES, channelName + " :End of NAMES list");
-
-	if (users.size() == 1)
-		channel->addOperator(&client);
+	Replies(client.getFd(), RPL_NAMREPLY, client.getNickname() + " = " + channelName + " :" + userList);
+	Replies(client.getFd(), RPL_ENDOFNAMES, client.getNickname() + " " + channelName + " :End of NAMES list");
 }
 
 void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
