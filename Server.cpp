@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 20:49:26 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/22 01:23:27 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -309,7 +309,17 @@ void Server::removeClient(int poll_index)
 	{
 		if (cls[i]->getFd() == client_fd)
 		{
-			// broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
+			Channel *m;
+			std::vector<std::string> chans = cls[i]->getJoinedChannelsName();
+			for (size_t i = 0; i < chans.size(); ++i)
+			{
+				m = findChannel(chans[i]);
+				if (m != NULL)
+				{
+					m->removeUser(cls[i]);
+				}
+			}
+			broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
 			cls.erase(cls.begin() + i);
 			break;
 		}

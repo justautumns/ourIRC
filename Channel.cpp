@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/21 23:08:21 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/22 02:06:13 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,9 @@ void Channel::setUserLimit(int max_limit)
 
 void Channel::addUser(Client *client)
 {
-	for (size_t i = 0; i < channelUsers.size(); ++i)
+	for (std::vector<Client*>::iterator it = channelUsers.begin(); it != channelUsers.end(); ++it)
 	{
-		if (channelUsers[i] == client)
+		if (*it == client)
 			return;
 	}
 	channelUsers.push_back(client);
@@ -54,6 +54,8 @@ void Channel::removeUser(Client *client)
 		if (*it == client)
 		{
 			channelUsers.erase(it);
+			if (isOperator(*it))
+				removeOperator(*it);
 			break;
 		}
 	}

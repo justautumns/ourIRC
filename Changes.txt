@@ -1,0 +1,4 @@
+1.) I added in Server.cpp -> removeClient function, before removing the client I make sure client leaves all the channels it's in.
+if it's in any channel.
+2.) I added in Channel.cpp -> removeUser function, If the user in operators array we delete the user from that list too. 
+when user were parting the channel it was still list in ops array.

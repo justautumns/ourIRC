@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelCommands.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 22:11:04 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/22 01:40:05 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void Server::executeKICK(Channel &channel, Client &client, const std::string& to
 	}
 
 	std::string kickMsg = ":" + client.getNickname() + " KICK " + channel.getName() + " " + to_kick + " :"  "Kicked" + "\r\n";
-	broadcast(kickMsg, -1);
+	broadcast(kickMsg, target->getFd());
 	
 	channel.removeUser(target);
 
