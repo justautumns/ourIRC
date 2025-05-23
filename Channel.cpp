@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/22 22:16:59 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 17:26:14 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,13 @@ void Channel::setPw(std::string pass)
 	this->pw = pass;
 }
 
+bool Channel::passwordCorrect(std::string pass)
+{
+	if (this->pw.compare(pass) == 0)
+		return true;
+	return false;
+}
+
 void Channel::setTopic(std::string topic_)
 {
 	this->topic = topic_;
@@ -33,6 +40,8 @@ void Channel::setUserLimit(int max_limit)
 {
 	this->maxUser = max_limit;
 }
+
+int Channel::getUserLimit() {return this->maxUser;}
 
 void Channel::addUser(Client *client)
 {
@@ -168,7 +177,7 @@ const std::vector<Client*>& Channel::getUsers() const
 	return this->channelUsers;
 }
 
-size_t Channel::getUserCount() const
+int Channel::getUserCount() const
 {
 	return channelUsers.size();
 }

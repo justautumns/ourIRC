@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 23:12:47 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:30:20 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Client::Client(int fd)
 	this->isRegistered = false;
 	this->isInChannel = false;
 	this->got_cap_end = false;
+	// this->isOnline = true;
 	this->hostname = "localhost";
 }
 
@@ -153,6 +154,16 @@ bool Client::hasInvitation(std::string channel_name)
 			return true;
 	}
 	return false;
+}
+
+void Client::setisOnline(bool status)
+{
+	this->isOnline = status;
+}
+
+bool Client::getIsOnline() const
+{
+	return (this->isOnline);
 }
 
 bool Client::is_cap_end_received() {return this->got_cap_end;}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/23 03:13:16 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/23 17:26:19 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Channel
 		void removeOperator(Client* client);
 		bool isUserInChannel(Client* client) const;
 		bool isOperator(Client* client) const;
+		bool passwordCorrect(std::string pass);
 
 		// // Mod ayarları
 		// void setInviteOnly(bool status);
@@ -63,8 +64,9 @@ class Channel
 		const std::string& getTopic() const;
 		std::string& getHostName();
 		const std::vector<Client*>& getUsers() const;
-		size_t getUserCount() const;
+		int getUserCount() const;
 		int getOperatorCount();
+		int getUserLimit();
 		void broadcast(const std::string& message);
 		void broadcast1(const std::string& message, Client *ptr);
 		bool hasMode(char x);

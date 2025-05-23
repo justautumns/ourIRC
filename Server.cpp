@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 02:56:08 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:28:34 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ Server::Server(const int port_, std::string password_) : port(port_) , passwd(pa
 {
 	// serverName = " IRC Server by Emre & Michal";
 	serverName = "irc.em.org";
-	client_removed = false;
 	setupSignals();
 }
 
@@ -100,7 +99,13 @@ void Server::Routine()
 				for (size_t i = 0; i < cls.size(); ++i)
 					delete cls[i];
 			}
+			for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it++)
+			{
+				delete it->second;
+			}
+			channels.clear();
 			cls.clear();
+			close(Fd);
 			break;
 		}
 		
@@ -149,6 +154,7 @@ void Server::addClient()
 
 	// push back new client I just didn't get back to using stack actually I also get error I tried
 	Client *yeniUser = new Client(client_fd);
+	yeniUser->setisOnline(true);
 	cls.push_back(yeniUser);
 
 	std::cout << "New client connected FD number is : " << yeniUser->getFd() <<  std::endl;
@@ -174,7 +180,7 @@ void Server::sendAndReceiveClient(int poll_index)
 	// Process complete commands
 	size_t pos;
 	// "COMMAND1\nCOMMAND2\n" can also bw tried that's why I used a loop but still not sure about \r
-	while (client_removed == false && (pos = client->getBuffer().find("\r\n")) != std::string::npos) 
+	while (client->getIsOnline() && (pos = client->getBuffer().find("\r\n")) != std::string::npos) 
 	{
 		std::string command = client->getBuffer().substr(0, pos);
 		client->eraseFromBuffer(0, pos + 2);
@@ -317,17 +323,8 @@ void Server::removeClient(int poll_index)
 	{
 		if (cls[i]->getFd() == client_fd)
 		{
-			Channel *m;
-			std::vector<std::string> chans = cls[i]->getJoinedChannelsName();
-			for (size_t i = 0; i < chans.size(); ++i)
-			{
-				m = findChannel(chans[i]);
-				if (m != NULL)
-				{
-					m->removeUser(cls[i]);
-				}
-			}
-			broadcast(cls[i]->getNickname() + " has been disconnected", client_fd);
+			broadcast(":" + serverName + " " + cls[i]->getNickname() + " has been disconnected\r\n", client_fd);
+			cls[i]->setisOnline(false);
 			delete cls[i];
 			cls.erase(cls.begin() + i);
 			break;
@@ -336,7 +333,7 @@ void Server::removeClient(int poll_index)
 
 	fd_polls.erase(fd_polls.begin() + poll_index);
 	std::cout << "Client removed. FD: " << client_fd << std::endl;
-	client_removed = true;
+	
 }
 
 void Server::handleSignal(int sig)

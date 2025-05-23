@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.hpp                                         :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/21 00:05:06 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 18:43:51 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 class Client 
 {
 	private:
+	bool isOnline;
 	int fd;
 	bool got_cap_end;
 	std::string nickname;
@@ -45,6 +46,7 @@ class Client
 	const std::string& getUsername() const;
 	const std::string& getRealname() const;
 	const std::string& getHostname() const;
+	bool getIsOnline() const;
 	bool getHasPassword() const;
 	bool getIsRegistered() const;
 	std::vector<std::string> &getJoinedChannelsName();
@@ -55,6 +57,7 @@ class Client
 	void setUserInfo(const std::string& user, const std::string& real);
 	void setPassword(bool status);
 	void setRegistered(bool status);
+	void setisOnline(bool status);
 	void updateLastActivity();
 	void setInvalidPasswordAttempt();
 	void addJoinedChannel(std::string channel_name);

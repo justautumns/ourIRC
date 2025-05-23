@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/22 22:38:12 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:16:13 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ class Channel;
 class Server 
 {
 	private :
-	bool client_removed;
 	std::string	serverName;
 	int port;
 	std::string passwd;
@@ -70,7 +69,7 @@ class Server
 	void	passHandle(Client &client, const std::vector<std::string> &arguments);
 	void	nickNameHandle(Client &client, const std::vector<std::string> &arguments);
 	void	userHandle(Client &client, const std::vector<std::string> &arguments);
-	void	broadcast(const std::string& message, int exclude_fd = -1);
+	void	broadcast(const std::string& message, int exclude_fd);
 	void	checkClientTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
 	void	privmsgHandle(Client &client, const std::vector<std::string>& args);
 	void	capHandle(Client &client, const std::vector<std::string>& args);

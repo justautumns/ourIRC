@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 16:12:39 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:18:16 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,11 +199,30 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 	// Kanalı bul veya oluştur
 	Channel* channel = findOrCreateChannel(channelName);
 
-	if (channel->hasMode('i') && !client.hasInvitation(channel->getName())) // check also limit of users
+	if (channel->hasMode('i') && !client.hasInvitation(channel->getName()))
 	{
-		std::string inform_msg = ":" + serverName + " You need an invitaion to join this channel\r\n"; //check how to prevent window of channel from opening
-		send(client.getFd(), inform_msg.c_str(), inform_msg.length(), 0);
+		Replies(client.getFd(), ERR_INVITEONLYCHAN, channelName + " :You need an ivitation to join this channel");
 		return;
+	}
+
+	if (channel->hasMode('l') && (channel->getUserCount() >= channel->getUserLimit()))
+	{
+		Replies(client.getFd(), ERR_CHANNELISFULL, channelName + " :Channel capacity is full - you cannot join");
+		return;
+	}
+
+	if (channel->hasMode('k'))
+	{
+		if (args.size() < 2)
+		{
+			Replies(client.getFd(), ERR_BADCHANNELKEY, channelName + " :You need to provide password to join this channel");
+			return;
+		}
+		if (!channel->passwordCorrect(args[1]))
+		{
+			Replies(client.getFd(), ERR_BADCHANNELKEY, channelName + " :Wrong password");
+			return;
+		}
 	}
 
 	channel->addUser(&client);
@@ -303,19 +322,17 @@ void Server::quitHandle(Client &client, const std::vector<std::string>& args)
 		Channel *channel = findChannel(aa[i]);
 		if (channel)
 		{
-			channel->removeUser(&client);
-			std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
-			send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
+			std::string cmd = "PART";
+			chanComments(client, cmd, args);
+			// channel->removeUser(&client);
+			// std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
+			// send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
 		}
 	}
 	for (size_t i = 0; i < fd_polls.size(); ++i)
 	{
 		if (fd_polls[i].fd == client.getFd())
-		{
-			std::string quitMsg = ":" + client.getNickname() + " QUIT :" + (args.empty() ? "Client quit" : args[0]) + "\r\n";
-			broadcast(quitMsg, client.getFd());
 			removeClient(i);
-		}
 	}
 }
 
