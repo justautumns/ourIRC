@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 18:06:11 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:50:10 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		Replies(client.getFd(), ERR_NOSUCHCHANNEL, client.getNickname() + " " + args[0] + " :No such channel");
 		return;
 	}
-	// std::cout << args[0] << " " << args[1] << " " << std::endl; // WELL THAT'S INTERESTING... AFTER '/JOIN #TEST' IT WAS -> #test #test
+
 	if (cmd == "KICK")
 	{
 		if (args.size() < 2)

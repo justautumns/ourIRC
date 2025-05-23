@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 19:28:34 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 20:30:13 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,8 @@ void Server::Routine()
 					addClient(); // we add the client which is new if the socket FD matches that we create in the function up there, I mean the previous function(startServer)
 				else 
 				{
-					if (fd_polls[i].revents & (POLLERR | POLLHUP)) // IF revents which means an event accoured and there's an error or connection lost we remove the client
-						removeClient(i);
+					if (fd_polls[i].revents & (POLLERR | POLLHUP))
+						removeClient(i); // IF revents which means an event accoured and there's an error or connection lost we remove the client
 					else // Else we start examine the data that our socket receives from the clients.
 						sendAndReceiveClient(i);
 				}
@@ -154,7 +154,6 @@ void Server::addClient()
 
 	// push back new client I just didn't get back to using stack actually I also get error I tried
 	Client *yeniUser = new Client(client_fd);
-	yeniUser->setisOnline(true);
 	cls.push_back(yeniUser);
 
 	std::cout << "New client connected FD number is : " << yeniUser->getFd() <<  std::endl;
@@ -173,6 +172,8 @@ void Server::sendAndReceiveClient(int poll_index)
 			removeClient(poll_index);
 		return;
 	}
+	if (!client)
+		return;
 
 	buffer[bytes_read] = '\0';
 	client->appendToBuffer(buffer);
@@ -184,6 +185,11 @@ void Server::sendAndReceiveClient(int poll_index)
 	{
 		std::string command = client->getBuffer().substr(0, pos);
 		client->eraseFromBuffer(0, pos + 2);
+		if (command == "QUIT")
+		{
+			parseHandleCmd(*client, command);
+			break;
+		}
 		parseHandleCmd(*client, command);
 	}
 }
@@ -325,7 +331,7 @@ void Server::removeClient(int poll_index)
 		{
 			broadcast(":" + serverName + " " + cls[i]->getNickname() + " has been disconnected\r\n", client_fd);
 			cls[i]->setisOnline(false);
-			delete cls[i];
+			//delete cls[i];
 			cls.erase(cls.begin() + i);
 			break;
 		}

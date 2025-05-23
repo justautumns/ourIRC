@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 19:30:20 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 20:17:04 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Client::Client(int fd)
 	this->isRegistered = false;
 	this->isInChannel = false;
 	this->got_cap_end = false;
-	// this->isOnline = true;
+	this->isOnline = true;
 	this->hostname = "localhost";
 }
 

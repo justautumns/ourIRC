@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 19:18:16 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:46:23 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -322,8 +322,11 @@ void Server::quitHandle(Client &client, const std::vector<std::string>& args)
 		Channel *channel = findChannel(aa[i]);
 		if (channel)
 		{
+			std::vector<std::string> argsss;
+			argsss.push_back(channel->getName());
+			if (!args[0].empty()) argsss.push_back(args[0]);
 			std::string cmd = "PART";
-			chanComments(client, cmd, args);
+			chanComments(client, cmd, argsss);
 			// channel->removeUser(&client);
 			// std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
 			// send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);
