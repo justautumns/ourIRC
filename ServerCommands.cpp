@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCommands.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 03:19:22 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/23 16:12:39 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,9 +199,9 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 	// Kanalı bul veya oluştur
 	Channel* channel = findOrCreateChannel(channelName);
 
-	if (channel->hasMode('i') && !client.hasInvitation(channel->getName()))
+	if (channel->hasMode('i') && !client.hasInvitation(channel->getName())) // check also limit of users
 	{
-		std::string inform_msg = "You need an invitaion to join this channel\r\n";
+		std::string inform_msg = ":" + serverName + " You need an invitaion to join this channel\r\n"; //check how to prevent window of channel from opening
 		send(client.getFd(), inform_msg.c_str(), inform_msg.length(), 0);
 		return;
 	}
@@ -214,9 +214,9 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 	channel->broadcast(joinMsg);
 
 	// 2. Kanal konusu (RPL_TOPIC 332) // THIS IS PROBABLY NOT COMPLETED.
-	if (!channel->getTopic().empty())
+	if (!channel->getTopic().empty() && !channel->hasMode('t'))
 	{
-		Replies(client.getFd(), RPL_TOPIC, channel->getName() + " :" + channel->getTopic());
+		Replies(client.getFd(), RPL_TOPIC, client.getNickname() + " " + channelName + " :" + channel->getTopic());
 	}
 
 	// 3. Kullanıcı listesi (RPL_NAMREPLY 353)
@@ -227,7 +227,7 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 	for (size_t i = 0; i < users.size(); ++i)
 	{
 		if (i > 0) userList += " ";
-		userList += std::string(channel->isOperator(users[i]) ? "@" : "") + users[i]->getNickname();
+		userList += (std::string(channel->isOperator(users[i]) ? "@" : "") + users[i]->getNickname());
 	}
 	Replies(client.getFd(), RPL_NAMREPLY, client.getNickname() + " = " + channelName + " :" + userList);
 	Replies(client.getFd(), RPL_ENDOFNAMES, client.getNickname() + " " + channelName + " :End of NAMES list");

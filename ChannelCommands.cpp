@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelCommands.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 03:14:45 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/23 15:58:03 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		return;
 	}
 
-	//Channel* channel = (cmd == "KICK" || cmd == "TOPIC" || cmd == "PART") ? findChannel(args[0]) : findChannel(args[1]); // temporary solution for INVITE check, but we're gonna have to change that
 	Channel *channel = findChannel(args[0]);
 	if (cmd == "INVITE")
 		channel = findChannel(args[1]);
@@ -67,7 +66,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		Replies(client.getFd(), ERR_NOSUCHCHANNEL, client.getNickname() + " " + args[0] + " :No such channel");
 		return;
 	}
-	std::cout << args[0] << " " << args[1] << " " << std::endl;
+	std::cout << args[0] << " " << args[1] << " " << std::endl; // WELL THAT'S INTERESTING... AFTER '/JOIN #TEST' IT WAS -> #test #test
 	if (cmd == "KICK")
 	{
 		if (args.size() < 2)
@@ -157,7 +156,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 	{
 		if (!channel->isUserInChannel(&client))
 		{
-			Replies(client.getFd(), ERR_NOTONCHANNEL, client.getNickname() + " " + args[0] + " :You're not on that channel");
+			Replies(client.getFd(), ERR_NOTONCHANNEL, client.getNickname() + " " + channel->getName() + " :You're not on that channel");
 			return;
 		}
 
@@ -179,7 +178,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		}
 
 		std::string partMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@"
-								+ client.getHostname() + " PART " + args[0] + (reason[0] == ':' ? " " : " :") + reason + "\r\n";
+								+ client.getHostname() + " PART " + channel->getName() + (reason[0] == ':' ? " " : " :") + reason + "\r\n";
 
 		channel->broadcast(partMsg);
 		channel->removeUser(&client);
@@ -189,7 +188,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			if (channel->getUserCount() >= 1 && channel->getOperatorCount() == 1)
 			{
 				std::string to_promote = channel->promoteToOP_andReturnNick();
-				std::string prom_msg = ":" + serverName + " MODE " + args[0] + " +o " + to_promote + "\r\n";
+				std::string prom_msg = ":" + serverName + " MODE " + channel->getName() + " +o " + to_promote + "\r\n";
 				channel->broadcast(prom_msg);
 			}
 			channel->removeOperator(&client);
@@ -211,9 +210,6 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			Replies(client.getFd(), ERR_NOSUCHNICK, client.getNickname() + " " + args[0] + " :No such nick");
 			return;
 		}
-
-		// std::string channelName = args[1];
-		// channel = findChannel(channelName);
 
 		if (!channel)
 		{
@@ -249,9 +245,15 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 
 	else if (cmd == "MODE")
 	{
+		if (args.size() == 1)
+		{
+			Replies(client.getFd(), RPL_CHANNELMODEIS, client.getNickname() + " " + channel->getName() + " itkol");
+			return;
+		}
+		std::string client_info = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
 		if (!channel->isOperator(&client))
 		{
-			Replies(client.getFd(), ERR_CHANOPRIVSNEEDED, client.getNickname() + " " + args[0] + " :You're not channel operator");
+			Replies(client.getFd(), ERR_CHANOPRIVSNEEDED, client.getNickname() + " " + channel->getName() + " :You're not channel operator");
 			return;
 		}
 
@@ -261,34 +263,38 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			if (target)
 			{
 				channel->addOperator(target);
-				std::string modeMsg = ":" + client.getNickname() + " MODE " + args[2] + " +o " + "\r\n";
-				broadcast(modeMsg, client.getFd());
+				std::string modeMsg = client_info + " MODE " + channel->getName() + " +o " + target->getNickname() + "\r\n";
+				channel->broadcast(modeMsg);
 			}
+			return;
 		}
-
+		// IF TARGET NOT ON CHANNEL -> NOTIFY ----------------------------------------------------------------------------------
 		if (args.size() >= 2 && args[1] == "-o")
 		{
 			Client* target = findClientByNick(args[2]);
 			if (target)
 			{
 				channel->removeOperator(target);
-				std::string modeMsg = ":" + client.getNickname() + " MODE " + args[2] + " -o " + "\r\n";
-				broadcast(modeMsg, client.getFd());
+				std::string modeMsg = client_info + " MODE " + channel->getName() + " -o " + target->getNickname() + "\r\n";
+				channel->broadcast(modeMsg);
 			}
+			return;
 		}
 
 		if (args.size() >= 2 && args[1] == "+i")
 		{
 			channel->setModes(args[1][1]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " +i " + "\r\n";
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " +i" + "\r\n";
 			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 2 && args[1] == "-i")
 		{
 			channel->removeMode(args[1][1]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " -i " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " -i" + "\r\n";
+			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 3 && args[1] == "+k")
@@ -296,16 +302,18 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			// password syntax check?
 			channel->setModes(args[1][1]);
 			channel->setPw(args[2]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " +k " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " +k" + "\r\n";
+			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 3 && args[1] == "-k")
 		{
 			channel->removePass();
 			channel->removeMode(args[1][1]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " -k " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " -k" + "\r\n";
+			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 3 && args[1] == "+l")
@@ -317,7 +325,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 				if (!isdigit(args[2][i]))
 				{
 					std::stringstream error;
-					error << "Parameter of MODE +l command has to be a positive integer\r\n";
+					error << ":" << serverName << " Parameter of MODE +l command has to be a positive integer\r\n";
 					send(client.getFd(), error.str().c_str(), error.str().length(), 0);
 					return;
 				}
@@ -326,7 +334,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			if (args[2].length() > 3)
 			{
 				std::stringstream error;
-				error << "The max number of clients you can set is " << MAX_CLIENT << " \r\n";
+				error << ":" << serverName << " The max number of clients you can set is " << MAX_CLIENT << " \r\n";
 				send(client.getFd(), error.str().c_str(), error.str().length(), 0);
 				return;
 			}
@@ -334,35 +342,38 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			if (std::atoi(args[2].c_str()) > MAX_CLIENT)
 			{
 				std::stringstream error;
-				error << "The max number of clients you can set is " << MAX_CLIENT << " \r\n";
+				error << ":" << serverName << " The max number of clients you can set is " << MAX_CLIENT << " \r\n";
 				send(client.getFd(), error.str().c_str(), error.str().length(), 0);
 				return;
 			}
 
 			channel->setUserLimit(std::atoi(args[2].c_str()));
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + args[2] + " +l " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " +l " + args[2] + "\r\n";
+			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 2 && args[1] == "-l")
 		{
 			channel->removeMode(args[1][1]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " -l " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " -l" + "\r\n";
+			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 2 && args[1] == "+t")
 		{
 			channel->setModes(args[1][1]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " +t " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " +t" + "\r\n";
+			channel->broadcast(modeMsg);
+			return;
 		}
 
 		if (args.size() >= 2 && args[1] == "-t")
 		{
 			channel->removeMode(args[1][1]);
-			std::string modeMsg = ":" + client.getNickname() + " MODE " + " -t " + "\r\n";
-			broadcast(modeMsg, client.getFd());
+			std::string modeMsg = client_info + " MODE " + channel->getName() + " -t" + "\r\n";
+			channel->broadcast(modeMsg);
 		}
 	}
 }

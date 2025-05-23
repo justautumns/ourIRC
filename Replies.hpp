@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:18:50 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/22 23:25:32 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 15:23:15 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@
 #define RPL_NAMREPLY 353  // Kanaldaki kullanıcı listesi
 #define RPL_ENDOFNAMES 366  // Kullanıcı listesi sonu
 #define RPL_INVITING 341 // confirmation that the invitation to a channel has been sent
+#define RPL_CHANNELMODEIS 324 // replying for available channel modes
 
 // Error Replies (RFC 1459 Section 6.3)
 #define ERR_NOSUCHCHANNEL   403  // Kanal bulunamadı
