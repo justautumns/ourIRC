@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelCommands.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 00:01:01 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 03:14:45 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,16 +55,19 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		return;
 	}
 
-	Channel* channel = (cmd == "KICK" || cmd == "TOPIC" || cmd == "PART") ? findChannel(args[0]) : findChannel(args[1]); // temporary solution for INVITE check, but we're gonna have to change that
-
-	if (!channel)
+	//Channel* channel = (cmd == "KICK" || cmd == "TOPIC" || cmd == "PART") ? findChannel(args[0]) : findChannel(args[1]); // temporary solution for INVITE check, but we're gonna have to change that
+	Channel *channel = findChannel(args[0]);
+	if (cmd == "INVITE")
+		channel = findChannel(args[1]);
+		
+	if (channel == NULL)
 	{
 		if (args[0].compare(client.getNickname()) == 0) // for the MODE command being sent by irssi -> (MODE <nickname> +i)
 			return;
 		Replies(client.getFd(), ERR_NOSUCHCHANNEL, client.getNickname() + " " + args[0] + " :No such channel");
 		return;
 	}
-
+	std::cout << args[0] << " " << args[1] << " " << std::endl;
 	if (cmd == "KICK")
 	{
 		if (args.size() < 2)
@@ -118,7 +121,6 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			Replies(client.getFd(), ERR_CHANOPRIVSNEEDED, client.getNickname() + " " + channelName + " :You're not channel operator");
 			return;
 		}
-
 
 		if (args.size() == 1)
 		{
@@ -210,30 +212,30 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			return;
 		}
 
-		std::string channelName = args[1];
-		channel = findChannel(channelName);
+		// std::string channelName = args[1];
+		// channel = findChannel(channelName);
 
 		if (!channel)
 		{
-			Replies(client.getFd(), ERR_NOSUCHCHANNEL, client.getNickname() + " " + channelName + " :No such channel");
+			Replies(client.getFd(), ERR_NOSUCHCHANNEL, client.getNickname() + " " + channel->getName() + " :No such channel");
 			return;
 		}
 
 		if (!channel->isUserInChannel(&client))
 		{
-			Replies(client.getFd(), ERR_NOTONCHANNEL, client.getNickname() + " " + channelName + " :You're not on that channel");
+			Replies(client.getFd(), ERR_NOTONCHANNEL, client.getNickname() + " " + channel->getName() + " :You're not on that channel");
 			return;
 		}
 
 		if (!channel->isOperator(&client))
 		{
-			Replies(client.getFd(), ERR_CHANOPRIVSNEEDED, client.getNickname() + " " + channelName + " :You're not channel operator");
+			Replies(client.getFd(), ERR_CHANOPRIVSNEEDED, client.getNickname() + " " + channel->getName() + " :You're not channel operator");
 			return;
 		}
 
 		if (channel->isUserInChannel(target))
 		{
-			Replies(client.getFd(), ERR_USERONCHANNEL, client.getNickname() + " " + target->getNickname() + " " + channelName + " :is already on channel");
+			Replies(client.getFd(), ERR_USERONCHANNEL, client.getNickname() + " " + target->getNickname() + " " + channel->getName() + " :is already on channel");
 			return;
 		}
 
@@ -241,7 +243,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		std::string invite_msg = ":" + client.getNickname() + "!" + client.getUsername() + "@"
 								+ client.getHostname() + " INVITE " + target->getNickname() + " :" + channel->getName() + "\r\n";
 		send(target->getFd(), invite_msg.c_str(), invite_msg.length(), 0);
-		Replies(client.getFd(), RPL_INVITING, client.getNickname() + " " + target->getNickname() + " " + channelName);
+		Replies(client.getFd(), RPL_INVITING, client.getNickname() + " " + target->getNickname() + " " + channel->getName());
 
 	}
 

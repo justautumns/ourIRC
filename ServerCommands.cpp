@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCommands.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/22 16:28:55 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 03:19:22 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,10 +213,10 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 	std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " JOIN :" + channelName + "\r\n";
 	channel->broadcast(joinMsg);
 
-	// 2. Kanal konusu (RPL_TOPIC 332)
+	// 2. Kanal konusu (RPL_TOPIC 332) // THIS IS PROBABLY NOT COMPLETED.
 	if (!channel->getTopic().empty())
 	{
-		Replies(client.getFd(), RPL_TOPIC, channelName + " :" + channel->getTopic());
+		Replies(client.getFd(), RPL_TOPIC, channel->getName() + " :" + channel->getTopic());
 	}
 
 	// 3. Kullanıcı listesi (RPL_NAMREPLY 353)
