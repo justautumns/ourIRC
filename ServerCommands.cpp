@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 19:46:23 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 23:49:35 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,13 +52,15 @@ void Server::passHandle(Client &client, const std::vector<std::string>& args)
 	} 
 	else
 	{
-		Replies(client.getFd(), ERR_PASSWDMISMATCH, ":Password incorrect");
+		Replies(client.getFd(), ERR_PASSWDMISMATCH, "PASS :Password incorrect");
 		// We have to find and disconnect this client
 		for (size_t i = 0; i < fd_polls.size(); ++i)
 		{
 			if (fd_polls[i].fd == client.getFd())
 			{
-				removeClient(i);
+				std::vector<std::string> arg;
+				arg.push_back(":leaving\r\n");
+				quitHandle(client, arg);
 				break;
 			}
 		}
@@ -316,6 +318,7 @@ void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
 }
 void Server::quitHandle(Client &client, const std::vector<std::string>& args)
 {
+	to_remove = true;
 	std::vector<std::string> aa = client.getJoinedChannelsName();
 	for (size_t i = 0; i < aa.size(); ++i)
 	{
@@ -335,7 +338,10 @@ void Server::quitHandle(Client &client, const std::vector<std::string>& args)
 	for (size_t i = 0; i < fd_polls.size(); ++i)
 	{
 		if (fd_polls[i].fd == client.getFd())
+		{
 			removeClient(i);
+			break;
+		}
 	}
 }
 

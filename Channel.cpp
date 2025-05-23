@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/23 17:26:14 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 21:51:40 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,6 @@ void Channel::removeUser(Client *client)
 		if (*it == client)
 		{
 			channelUsers.erase(it);
-			if (isOperator(*it))
-				removeOperator(*it);
 			break;
 		}
 	}

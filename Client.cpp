@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 20:17:04 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/24 00:09:13 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,8 +125,8 @@ bool Client::shouldDisconnect() const
 }
 bool Client::canRegister() const
 {
-	//return hasPassword && !getNickname().empty() && !getUsername().empty();
-	return !nickname.empty() && !username.empty();
+	return hasPassword && !getNickname().empty() && !getUsername().empty();
+	// return !nickname.empty() && !username.empty();
 }
 
 std::vector<std::string> &Client::getJoinedChannelsName()
@@ -136,6 +136,17 @@ std::vector<std::string> &Client::getJoinedChannelsName()
 
 // std::vector<std::string> &Client::getJoinedChannelsName() {return this->invitations;}
 void Client::addJoinedChannel(std::string channel_name) {this->joinedChannels.push_back(channel_name);}
+
+void Client::removeJoinedChannel(std::string channel_name)
+{
+	for (size_t i = 0; i < this->joinedChannels.size(); i++)
+	{
+		if (joinedChannels[i].compare(channel_name) == 0)
+			joinedChannels.erase(joinedChannels.begin() + i);
+		break;
+	}
+}
+
 void Client::addInvitation(std::string channel_name)
 {
 	for (size_t i = 0; i < this->invitations.size(); i++)

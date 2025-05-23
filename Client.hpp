@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 18:43:51 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/24 00:05:17 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ class Client
 	void updateLastActivity();
 	void setInvalidPasswordAttempt();
 	void addJoinedChannel(std::string channel_name);
+	void removeJoinedChannel(std::string channel_name);
 	void addInvitation(std::string channel_name);
 
 	// Buffer management

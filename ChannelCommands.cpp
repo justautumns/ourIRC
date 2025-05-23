@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 19:50:10 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/24 00:09:48 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,6 +180,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		std::string partMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@"
 								+ client.getHostname() + " PART " + channel->getName() + (reason[0] == ':' ? " " : " :") + reason + "\r\n";
 
+
 		channel->broadcast(partMsg);
 		channel->removeUser(&client);
 
@@ -193,6 +194,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			}
 			channel->removeOperator(&client);
 		}
+		client.removeJoinedChannel(channel->getName());
 	}
 
 	else if (cmd == "INVITE")
@@ -268,7 +270,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			}
 			return;
 		}
-		// IF TARGET NOT ON CHANNEL -> NOTIFY ----------------------------------------------------------------------------------
+
 		if (args.size() >= 2 && args[1] == "-o")
 		{
 			Client* target = findClientByNick(args[2]);

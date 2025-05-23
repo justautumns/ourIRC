@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 19:16:13 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 21:12:04 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Server
 {
 	private :
 	std::string	serverName;
+	bool to_remove;
 	int port;
 	std::string passwd;
 	int	Fd;

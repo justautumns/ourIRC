@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 20:30:13 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/23 23:00:17 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,13 @@ void Server::Routine()
 				else 
 				{
 					if (fd_polls[i].revents & (POLLERR | POLLHUP))
-						removeClient(i); // IF revents which means an event accoured and there's an error or connection lost we remove the client
+					{
+						Client *client = cls[i - 1];
+						std::vector<std::string> arg;
+						arg.push_back(":lost connection\r\n");
+						quitHandle(*client, arg);
+					 // IF revents which means an event accoured and there's an error or connection lost we remove the client
+					}
 					else // Else we start examine the data that our socket receives from the clients.
 						sendAndReceiveClient(i);
 				}
@@ -154,6 +160,7 @@ void Server::addClient()
 
 	// push back new client I just didn't get back to using stack actually I also get error I tried
 	Client *yeniUser = new Client(client_fd);
+	// clientC = yeniUser->getIsOnline();
 	cls.push_back(yeniUser);
 
 	std::cout << "New client connected FD number is : " << yeniUser->getFd() <<  std::endl;
@@ -169,27 +176,25 @@ void Server::sendAndReceiveClient(int poll_index)
 	if (bytes_read <= 0)
 	{
 		if (errno != EWOULDBLOCK)
-			removeClient(poll_index);
+		{
+			std::vector<std::string> arg;
+			arg.push_back(":lost terminal\r\n");
+			quitHandle(*client, arg);
+		}
 		return;
 	}
-	if (!client)
-		return;
 
 	buffer[bytes_read] = '\0';
 	client->appendToBuffer(buffer);
+	to_remove = false;
 
 	// Process complete commands
 	size_t pos;
 	// "COMMAND1\nCOMMAND2\n" can also bw tried that's why I used a loop but still not sure about \r
-	while (client->getIsOnline() && (pos = client->getBuffer().find("\r\n")) != std::string::npos) 
+	while (!to_remove && (pos = client->getBuffer().find("\r\n")) != std::string::npos) 
 	{
 		std::string command = client->getBuffer().substr(0, pos);
 		client->eraseFromBuffer(0, pos + 2);
-		if (command == "QUIT")
-		{
-			parseHandleCmd(*client, command);
-			break;
-		}
 		parseHandleCmd(*client, command);
 	}
 }
@@ -330,8 +335,7 @@ void Server::removeClient(int poll_index)
 		if (cls[i]->getFd() == client_fd)
 		{
 			broadcast(":" + serverName + " " + cls[i]->getNickname() + " has been disconnected\r\n", client_fd);
-			cls[i]->setisOnline(false);
-			//delete cls[i];
+			delete cls[i];
 			cls.erase(cls.begin() + i);
 			break;
 		}
