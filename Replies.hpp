@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Replies.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:18:50 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 15:23:15 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 19:18:06 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REPLIES_HPP
 #define REPLIES_HPP
+
 
 #define RPL_WELCOME 001
 #define RPL_YOURHOST 002
@@ -38,6 +39,7 @@
 #define ERR_CHANNELISFULL 471
 #define ERR_INVITEONLYCHAN 473
 #define ERR_BADCHANNELKEY 475
+#define ERR_BADCHANMASK 476
 #define ERR_CHANOPRIVSNEEDED 482
 // Server Replies (RFC 1459 Section 6.1)
 #define RPL_MYINFO 004

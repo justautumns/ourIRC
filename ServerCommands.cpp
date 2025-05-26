@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCommands.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 23:49:35 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 19:51:23 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,10 +191,11 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 		return;
 	}
 
+	// CHANGES MADE
 	std::string channelName = args[0];
-	if (channelName[0] != '#')
+	if (channelName[0] != '#' && channelName[0] != '&')
 	{
-		Replies(client.getFd(), ERR_BADCHANNELKEY, channelName + " :Bad Channel Mask");
+		Replies(client.getFd(), ERR_BADCHANMASK, channelName + " :Bad Channel Mask");
 		return;
 	}
 
@@ -275,7 +276,7 @@ void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
 		message += args[i];
 	}
 
-	if (target[0] == '#')
+	if (target[0] == '#' || target[0] == '&')
 	{
 		Channel* channel = findChannel(target);
 		if (!channel)
