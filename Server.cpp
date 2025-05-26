@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 20:28:16 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:42:09 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,9 +100,9 @@ void Server::Routine()
 				for (size_t i = 0; i < cls.size(); ++i)
 					delete cls[i];
 			}
-			for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it++)
+			for (size_t i = 0; i < channels.size(); ++i)
 			{
-				delete it->second;
+				delete channels[i];
 			}
 			channels.clear();
 			cls.clear();
@@ -243,19 +243,23 @@ std::vector<std::string> splitIRCMessage(const std::string& message)
 
 Channel* Server::findOrCreateChannel(const std::string& name)
 {
-	std::map<std::string, Channel*>::iterator it = channels.find(name);
-	if (it != channels.end())
-		return it->second;
+	for(size_t i = 0; i < channels.size(); ++i)
+	{
+		if (channels[i]->getName() == name)
+			return (channels[i]);
+	}
 
 	Channel* newChannel = new Channel(name);
-	channels[name] = newChannel;
+	channels.push_back(newChannel);
 	return newChannel;
 }
 Channel* Server::findChannel(const std::string& name)
 {
-	std::map<std::string, Channel*>::iterator it = channels.find(name);
-	if (it != channels.end())
-		return it->second;
+	for(size_t i = 0; i < channels.size(); ++i)
+	{
+		if (channels[i]->getName() == name)
+			return (channels[i]);
+	}
 	return NULL;
 }
 
@@ -371,9 +375,9 @@ Server::~Server()
 		delete cls[i];
 	}
 	cls.clear();
-	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it++)
+	for (size_t i = 0; i < channels.size(); i++)
 	{
-		delete it->second;
+		delete channels[i];
 	}
 	channels.clear();
 	close(Fd);

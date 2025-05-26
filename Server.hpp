@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 18:56:24 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:37:55 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ class Server
 	static int signal; // for signal function
 	std::vector<Client *> cls;
 	std::vector<struct pollfd>	fd_polls;
-	std::map<std::string, Channel*> channels;
+	std::vector<Channel*> channels;
 	bool isCap;
 	
 	//Functions 
