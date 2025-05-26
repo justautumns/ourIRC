@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:16:05 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/15 21:58:33 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 15:47:41 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ int checkPortisValid(std::string &port)
 	ss << port;
 	long k;
 	ss >> k;
+	if (ss.fail() || !ss.eof())
+		return (-1);
 	if (k > std::numeric_limits<int>::max() || k < std::numeric_limits<int>::min())
 		return (-1);
 	int portint = static_cast<int>(k);

@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/23 23:00:17 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 16:59:31 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ Server::Server(const int port_, std::string password_) : port(port_) , passwd(pa
 {
 	// serverName = " IRC Server by Emre & Michal";
 	serverName = "irc.em.org";
+	// this->signal = 0;
 	setupSignals();
 }
 
@@ -46,8 +47,8 @@ void Server::startServer()
 	struct sockaddr_in adress;
 	memset(&adress, 0, sizeof(adress));
 	adress.sin_family = AF_INET;
-	adress.sin_addr.s_addr = INADDR_ANY;
-	adress.sin_port = htons(this->port);
+	adress.sin_addr.s_addr = INADDR_ANY; //0x0100007F
+	adress.sin_port = htons(this->port); //(return (port >> 8) | (port << 8)) 
 	// What are the things above? Here are the explanations Im just writing all of these that I learnt from youtube tutorials
 	// We neet to clear all bytes in padding that's the reason we use memset above
 	// sin_family is the family of the adresses s in the begining is saying this is a struct type it is technically struct in_family actually
@@ -93,7 +94,7 @@ void Server::Routine()
 			throw std::runtime_error("poll error");
 		else if (signal)
 		{
-			std::cout << "Server shutting down..." << std::endl;
+			std::cout << "\nServer shutting down..." << std::endl;
 			if (cls.size() > 0)
 			{
 				for (size_t i = 0; i < cls.size(); ++i)
@@ -208,8 +209,6 @@ std::string Server::getCreationTime() const
 	return buf;
 }
 
-
-
 std::vector<std::string> splitIRCMessage(const std::string& message)
 {
 	std::vector<std::string> args;
@@ -254,7 +253,7 @@ Channel* Server::findChannel(const std::string& name)
 
 void Server::parseHandleCmd(Client &client, const std::string &command)
 {
-	std::cout << "Received: '" << command << "'\n";
+	// std::cout << "Received: '" << command << "'\n";
 	std::vector<std::string> args = splitIRCMessage(command);
 
 	if (args.empty()) return;
@@ -363,4 +362,10 @@ Server::~Server()
 		delete cls[i];
 	}
 	cls.clear();
+	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it++)
+	{
+		delete it->second;
+	}
+	channels.clear();
+	close(Fd);
 }

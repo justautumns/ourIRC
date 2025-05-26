@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/23 21:51:40 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 15:06:58 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,15 @@ void Channel::removeMode(char x)
 			return;
 		}
 	}
+}
+
+std::string Channel::getModes()
+{
+	std::string enabled_modes;
+
+	for (size_t i = 0; i < this->modes.size(); i++)
+		enabled_modes += modes[i];
+	return enabled_modes;
 }
 
 bool Channel::hasMode(char x)

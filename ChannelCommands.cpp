@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/24 00:09:48 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 18:04:14 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,25 +249,43 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 	{
 		if (args.size() == 1)
 		{
-			Replies(client.getFd(), RPL_CHANNELMODEIS, client.getNickname() + " " + channel->getName() + " itkol");
+			Replies(client.getFd(), RPL_CHANNELMODEIS, client.getNickname() + " " + channel->getName() + " " + channel->getModes());
 			return;
 		}
-		std::string client_info = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
+
+		if (!channel)
+		{
+			Replies(client.getFd(), ERR_NOSUCHCHANNEL, client.getNickname() + " " + channel->getName() + " :No such channel");
+			return;
+		}
+
+		if (!channel->isUserInChannel(&client))
+		{
+			Replies(client.getFd(), ERR_NOTONCHANNEL, client.getNickname() + " " + channel->getName() + " :You're not on that channel");
+			return;
+		}
+
 		if (!channel->isOperator(&client))
 		{
 			Replies(client.getFd(), ERR_CHANOPRIVSNEEDED, client.getNickname() + " " + channel->getName() + " :You're not channel operator");
 			return;
 		}
 
+		std::string client_info = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
+
 		if (args.size() >= 2 && args[1] == "+o")
 		{
 			Client* target = findClientByNick(args[2]);
 			if (target)
 			{
+				if ((target->getNickname() == client.getNickname()) || (channel->isOperator(target)))
+					return;
 				channel->addOperator(target);
 				std::string modeMsg = client_info + " MODE " + channel->getName() + " +o " + target->getNickname() + "\r\n";
 				channel->broadcast(modeMsg);
+				return;
 			}
+			Replies(client.getFd(), ERR_NOSUCHNICK, client.getNickname() + " " + args[2] + " :No such nick");
 			return;
 		}
 
@@ -276,10 +294,14 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			Client* target = findClientByNick(args[2]);
 			if (target)
 			{
+				if ((target->getNickname() == client.getNickname()) || (!channel->isOperator(target)))
+					return;
 				channel->removeOperator(target);
 				std::string modeMsg = client_info + " MODE " + channel->getName() + " -o " + target->getNickname() + "\r\n";
 				channel->broadcast(modeMsg);
+				return;
 			}
+			Replies(client.getFd(), ERR_NOSUCHNICK, client.getNickname() + " " + args[2] + " :No such nick");
 			return;
 		}
 
@@ -301,7 +323,6 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 
 		if (args.size() >= 3 && args[1] == "+k")
 		{
-			// password syntax check?
 			channel->setModes(args[1][1]);
 			channel->setPw(args[2]);
 			std::string modeMsg = client_info + " MODE " + channel->getName() + " +k" + "\r\n";

@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 21:49:05 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/23 17:26:19 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 15:04:36 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class Channel
 		// void setUserLimit(size_t limit);
 		void setModes(char x);
 		void removeMode(char x);
+		std::string getModes();
 		std::string promoteToOP_andReturnNick();
 
 		// Getters
