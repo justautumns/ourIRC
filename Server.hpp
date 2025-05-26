@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 20:37:55 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 21:43:07 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,20 @@ class Server
 	void	addClient();
 	void	sendAndReceiveClient(int poll_index);
 	void	removeClient(int poll_index);
+
+
+	// Modes
+	void executeModes(Client &client, const std::vector<std::string>& args, Channel *channel);
+	void mode_Plus_O(Client &client, std::string param, Channel *channel);
+	void mode_Minus_O(Client &client, std::string param, Channel *channel);
+	void mode_Plus_I(Client &client, Channel *channel);
+	void mode_Minus_I(Client &client, Channel *channel);
+	void mode_Plus_K(Client &client, std::string param, Channel *channel);
+	void mode_Minus_K(Client &client, Channel *channel);
+	void mode_Plus_L(Client &client, std::string param, Channel *channel);
+	void mode_Minus_L(Client &client, Channel *channel);
+	void mode_Plus_T(Client &client, Channel *channel);
+	void mode_Minus_T(Client &client, Channel *channel);
 
 	// Client commands
 	void	Replies(int fd, int code, const std::string &msj) const;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelCommands.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 20:11:30 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 21:41:48 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,133 +275,6 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			return;
 		}
 
-		std::string client_info = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname();
-
-		if (args.size() >= 2 && args[1] == "+o")
-		{
-			Client* target = findClientByNick(args[2]);
-			if (target)
-			{
-				if ((target->getNickname() == client.getNickname()) || (channel->isOperator(target)))
-					return;
-				channel->addOperator(target);
-				std::string modeMsg = client_info + " MODE " + channel->getName() + " +o " + target->getNickname() + "\r\n";
-				channel->broadcast(modeMsg);
-				return;
-			}
-			Replies(client.getFd(), ERR_NOSUCHNICK, client.getNickname() + " " + args[2] + " :No such nick");
-			return;
-		}
-
-		if (args.size() >= 2 && args[1] == "-o")
-		{
-			Client* target = findClientByNick(args[2]);
-			if (target)
-			{
-				if ((target->getNickname() == client.getNickname()) || (!channel->isOperator(target)))
-					return;
-				channel->removeOperator(target);
-				std::string modeMsg = client_info + " MODE " + channel->getName() + " -o " + target->getNickname() + "\r\n";
-				channel->broadcast(modeMsg);
-				return;
-			}
-			Replies(client.getFd(), ERR_NOSUCHNICK, client.getNickname() + " " + args[2] + " :No such nick");
-			return;
-		}
-
-		if (args.size() >= 2 && args[1] == "+i")
-		{
-			channel->setModes(args[1][1]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " +i" + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 2 && args[1] == "-i")
-		{
-			channel->removeMode(args[1][1]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " -i" + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 3 && args[1] == "+k")
-		{
-			channel->setModes(args[1][1]);
-			channel->setPw(args[2]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " +k" + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 3 && args[1] == "-k")
-		{
-			channel->removePass();
-			channel->removeMode(args[1][1]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " -k" + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 3 && args[1] == "+l")
-		{
-			for (size_t i = 0; i < args[2].size(); i++)
-			{
-				if (i == 0 && args[2][i] == '+')
-					continue;
-				if (!isdigit(args[2][i]))
-				{
-					std::stringstream error;
-					error << ":" << serverName << " Parameter of MODE +l command has to be a positive integer\r\n";
-					send(client.getFd(), error.str().c_str(), error.str().length(), 0);
-					return;
-				}
-			}
-
-			if (args[2].length() > 3)
-			{
-				std::stringstream error;
-				error << ":" << serverName << " The max number of clients you can set is " << MAX_CLIENT << " \r\n";
-				send(client.getFd(), error.str().c_str(), error.str().length(), 0);
-				return;
-			}
-
-			if (std::atoi(args[2].c_str()) > MAX_CLIENT)
-			{
-				std::stringstream error;
-				error << ":" << serverName << " The max number of clients you can set is " << MAX_CLIENT << " \r\n";
-				send(client.getFd(), error.str().c_str(), error.str().length(), 0);
-				return;
-			}
-
-			channel->setModes(args[1][1]);
-			channel->setUserLimit(std::atoi(args[2].c_str()));
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " +l " + args[2] + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 2 && args[1] == "-l")
-		{
-			channel->removeMode(args[1][1]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " -l" + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 2 && args[1] == "+t")
-		{
-			channel->setModes(args[1][1]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " +t" + "\r\n";
-			channel->broadcast(modeMsg);
-			return;
-		}
-
-		if (args.size() >= 2 && args[1] == "-t")
-		{
-			channel->removeMode(args[1][1]);
-			std::string modeMsg = client_info + " MODE " + channel->getName() + " -t" + "\r\n";
-			channel->broadcast(modeMsg);
-		}
+		executeModes(client, args, channel);
 	}
 }

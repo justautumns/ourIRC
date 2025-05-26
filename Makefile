@@ -4,7 +4,8 @@ CXX = c++
 
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
-SRCS = main.cpp Server.cpp Client.cpp Channel.cpp ServerCommands.cpp ChannelCommands.cpp
+SRCS = main.cpp Server.cpp Client.cpp Channel.cpp ServerCommands.cpp ChannelCommands.cpp \
+		modes.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

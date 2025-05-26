@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Replies.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 01:18:50 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 19:18:06 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 21:43:34 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@
 #define ERR_BADCHANNELKEY 475
 #define ERR_BADCHANMASK 476
 #define ERR_CHANOPRIVSNEEDED 482
+#define ERR_UNKNOWNMODE 472
 // Server Replies (RFC 1459 Section 6.1)
 #define RPL_MYINFO 004
 #define RPL_ISUPPORT 005
