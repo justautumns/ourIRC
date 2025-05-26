@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 19:14:24 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:00:33 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,19 @@ void Client::addInvitation(std::string channel_name)
 	}
 	this->invitations.push_back(channel_name);
 }
+
+void Client::removeInvitation(std::string channel_name)
+{
+	for (size_t i = 0; i < this->invitations.size(); i++)
+	{
+		if (this->invitations[i].compare(channel_name) == 0)
+		{
+			this->invitations.erase(this->invitations.begin() + i);
+			return;
+		}
+	}
+}
+
 
 bool Client::hasInvitation(std::string channel_name)
 {

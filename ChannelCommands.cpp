@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelCommands.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 18:04:14 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:11:30 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@ void Server::executeKICK(Channel &channel, Client &client, const std::string& to
 	channel.broadcast(kickMsg);
 	if (channel.isOperator(target))
 		channel.removeOperator(target);
+		
+	target->removeJoinedChannel(channel.getName());
+	target->removeInvitation(channel.getName());
 	channel.removeUser(target);
-
 }
 void Server::chanComments(Client &client, std::string &cmd, const std::vector<std::string>& args)
 {
@@ -183,7 +185,8 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 
 		channel->broadcast(partMsg);
 		channel->removeUser(&client);
-
+		
+		
 		if (channel->isOperator(&client))
 		{
 			if (channel->getUserCount() >= 1 && channel->getOperatorCount() == 1)
@@ -194,6 +197,7 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 			}
 			channel->removeOperator(&client);
 		}
+		client.removeInvitation(channel->getName());
 		client.removeJoinedChannel(channel->getName());
 	}
 
