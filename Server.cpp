@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 19:15:34 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:28:16 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void Server::startServer()
 	struct sockaddr_in adress;
 	memset(&adress, 0, sizeof(adress));
 	adress.sin_family = AF_INET;
-	adress.sin_addr.s_addr = INADDR_ANY; //0x0100007F
+	adress.sin_addr.s_addr = inet_addr("127.0.0.1"); //0x0100007F
 	adress.sin_port = htons(this->port); //(return (port >> 8) | (port << 8)) 
 	// What are the things above? Here are the explanations Im just writing all of these that I learnt from youtube tutorials
 	// We neet to clear all bytes in padding that's the reason we use memset above
