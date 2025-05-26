@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 16:59:31 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 18:46:45 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -353,6 +353,7 @@ void Server::setupSignals()
 {
 	std::signal(SIGINT, &Server::handleSignal);  // CTRL+C
 	std::signal(SIGTERM, &Server::handleSignal); // kill komutu
+	std::signal(SIGQUIT, &Server::handleSignal); // \ kill
 }
 
 Server::~Server()

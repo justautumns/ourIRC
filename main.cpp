@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:16:05 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 15:47:41 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/26 18:41:39 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,17 @@ int checkPortisValid(std::string &port)
 	return (portint);
 }
 
+int passCheck(std::string &str)
+{
+	if (str.size() == 0)
+		return -1;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] == ' ' || str[i] == '\t')
+			return -1;
+	}
+	return (0);
+}
 int main(int ac, char **av)
 {
 	try
@@ -49,6 +60,9 @@ int main(int ac, char **av)
 			int portint = checkPortisValid(port);
 			if (portint == -1)
 				throw std::runtime_error("Invalid port detected");
+			int passin = passCheck(pass);
+			if (passin == -1)
+				throw std::runtime_error("Invalid password detected");
 			Server server(portint, pass);
 			server.startServer();
 			server.Routine();
