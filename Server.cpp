@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 18:46:45 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/26 19:02:37 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,6 +188,14 @@ void Server::sendAndReceiveClient(int poll_index)
 	buffer[bytes_read] = '\0';
 	client->appendToBuffer(buffer);
 	to_remove = false;
+
+	if (client->getBuffer().length() > 511)
+	{
+		std::vector<std::string> arg;
+		arg.push_back(":Msg is too long, you're now disconnected\r\n");
+		quitHandle(*client, arg);
+		return;
+	}
 
 	// Process complete commands
 	size_t pos;
