@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 14:48:46 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 18:49:59 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Client::Client(int fd)
 	this->last_ping_time = 0;
 	this->last_activity = time(NULL);
 	this->hostname = "localhost";
+	this->received_signal = false;
 }
 
 Client::~Client()
@@ -226,3 +227,5 @@ bool Client::getIsOnline() const
 
 bool Client::is_cap_end_received() {return this->got_cap_end;}
 void Client::set_cap_end(bool status) {this->got_cap_end = status;}
+void Client::setGotSignal(bool status) {this->received_signal = status;}
+bool Client::got_signal() {return this->received_signal;}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 14:36:27 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 18:49:03 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Client
 	bool hasPassword;
 	bool isRegistered;
 	bool isInChannel;
+	bool received_signal;
 
 	public:
 	Client(int fd);
@@ -57,6 +58,7 @@ class Client
 	time_t getLastPingTime() const;
 	bool hasInvitation(std::string channel_name);
 	bool isWaitingForPong() const;
+	bool got_signal();
 	
 	// Setters
 	void setNickname(const std::string& nick);
@@ -72,6 +74,7 @@ class Client
 	void removeInvitation(std::string channel_name);
 	void setWaitingForPong(bool status);
 	void setLastPingTime(time_t time);
+	void setGotSignal(bool status);
 
 
 	// Buffer management

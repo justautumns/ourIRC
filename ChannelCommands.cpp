@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 21:41:48 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/27 18:51:00 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,8 +183,16 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 								+ client.getHostname() + " PART " + channel->getName() + (reason[0] == ':' ? " " : " :") + reason + "\r\n";
 
 
-		channel->broadcast(partMsg);
-		channel->removeUser(&client);
+		if (client.got_signal())
+		{
+			channel->removeUser(&client);
+			channel->broadcast(partMsg);
+		}
+		else
+		{
+			channel->broadcast(partMsg);
+			channel->removeUser(&client);
+		}
 		
 		
 		if (channel->isOperator(&client))
@@ -254,6 +262,12 @@ void Server::chanComments(Client &client, std::string &cmd, const std::vector<st
 		if (args.size() == 1)
 		{
 			Replies(client.getFd(), RPL_CHANNELMODEIS, client.getNickname() + " " + channel->getName() + " " + channel->getModes());
+			return;
+		}
+
+		if (args.size() == 2 && args[1].size() == 1 && args[1][0] == 'b')
+		{
+			Replies(client.getFd(), RPL_ENDOFBANLIST, client.getNickname() + " " + channel->getName() + " :End of channel ban list");
 			return;
 		}
 

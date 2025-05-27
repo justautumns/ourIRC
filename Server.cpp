@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 15:44:52 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 18:56:57 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,7 @@ void Server::sendAndReceiveClient(int poll_index)
 	{
 		if (errno != EWOULDBLOCK)
 		{
+			client->setGotSignal(true);
 			std::vector<std::string> arg;
 			arg.push_back(":lost terminal\r\n");
 			quitHandle(*client, arg);
@@ -286,7 +287,6 @@ void Server::parseHandleCmd(Client &client, const std::string &command)
 	else if (cmd == "JOIN") joinHandle(client, args);
 	else if (cmd == "PRIVMSG" || cmd == "MSG") privmsgHandle(client, args);
 	else if (cmd == "PING") pingHandle(client, args);
-	else if (cmd == "PONG") pongHandle(client, args);
 	else if (cmd == "QUIT") quitHandle(client, args);
 	else if(cmd == "KICK" || cmd == "PART" || cmd == "MODE"
 			|| cmd == "INVITE" || cmd == "TOPIC") chanComments(client, cmd, args);

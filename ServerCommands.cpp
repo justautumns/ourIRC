@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCommands.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 15:53:28 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 17:59:02 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -386,12 +386,5 @@ void Server::pingHandle(Client &client, const std::vector<std::string>& args)
 	send(client.getFd(), pongMsg.c_str(), pongMsg.length(), 0);
 
 	// Just to check event activity
-	client.updateLastActivity();
-}
-
-void Server::pongHandle(Client &client, const std::vector<std::string>& args)
-{
-	(void)args;
-	client.setWaitingForPong(false); // this will mean pong received.
 	client.updateLastActivity();
 }
