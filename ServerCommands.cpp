@@ -6,7 +6,7 @@
 /*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 14:40:53 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 15:53:28 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,12 @@ void Server::passHandle(Client &client, const std::vector<std::string>& args)
 
 void Server::nickNameHandle(Client& client, const std::vector<std::string> &args)
 {
+	if (client.getHasPassword() == false)
+	{
+		Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered (Please enter password first)");
+		return;
+	}
+
 	if (args.empty())
 	{
 		Replies(client.getFd(), ERR_NONICKNAMEGIVEN, ":No nickname given");
@@ -136,6 +142,11 @@ void Server::nickNameHandle(Client& client, const std::vector<std::string> &args
 
 void Server::userHandle(Client &client, const std::vector<std::string>& args)
 {
+	if (client.getHasPassword() == false)
+	{
+		Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered (Please enter password first)");
+		return;
+	}
 	if (client.getIsRegistered())
 	{
 		Replies(client.getFd(), ERR_ALREADYREGISTERED, ":You may not reregister");
@@ -182,6 +193,11 @@ void Server::userHandle(Client &client, const std::vector<std::string>& args)
 
 void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 {
+	if (client.getHasPassword() == false)
+	{
+		Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered (Please enter password first)");
+		return;
+	}
 	if (args.empty())
 	{
 		Replies(client.getFd(), ERR_NEEDMOREPARAMS, "JOIN :Not enough parameters");
@@ -261,7 +277,13 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 
 void Server::privmsgHandle(Client &client, const std::vector<std::string>& args)
 {
-	if (!client.getIsRegistered()) {
+	if (client.getHasPassword() == false)
+	{
+		Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered (Please enter password first)");
+		return;
+	}
+	if (!client.getIsRegistered())
+	{
 		Replies(client.getFd(), ERR_NOTREGISTERED, ":You have not registered");
 		return;
 	}
