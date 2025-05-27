@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 00:09:13 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 19:59:19 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:36:27 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class Client
 	std::vector<std::string> joinedChannels;
 	std::vector<std::string> invitations;
 	time_t last_activity;
+	bool waiting_for_pong;  // PING gönderildi ama PONG alınmadı durumu
+	time_t last_ping_time;
 	int invalid_password_attempts;
 	bool hasPassword;
 	bool isRegistered;
@@ -50,7 +52,11 @@ class Client
 	bool getHasPassword() const;
 	bool getIsRegistered() const;
 	std::vector<std::string> &getJoinedChannelsName();
+	int getInvalidPasswordAttempt();
+	time_t getLastActivity();
+	time_t getLastPingTime() const;
 	bool hasInvitation(std::string channel_name);
+	bool isWaitingForPong() const;
 	
 	// Setters
 	void setNickname(const std::string& nick);
@@ -64,6 +70,8 @@ class Client
 	void removeJoinedChannel(std::string channel_name);
 	void addInvitation(std::string channel_name);
 	void removeInvitation(std::string channel_name);
+	void setWaitingForPong(bool status);
+	void setLastPingTime(time_t time);
 
 
 	// Buffer management

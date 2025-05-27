@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 20:42:09 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:49:12 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,7 @@ void Server::Routine()
 				}
 			}
 		}
+		checkPingTimeouts();
 	}
 	// BTW I noticed that while I am writing explanation I sometimes fuck the indent level up, so in out fd_polls there are two types of FD's the first FD in our
 	// fd_polls array at index 0 is our main socket, if fd_polls[i] is 0 we are calling accept() function in our addClient function, and there we add an FD for each new client.
@@ -184,11 +185,13 @@ void Server::sendAndReceiveClient(int poll_index)
 		}
 		return;
 	}
+	if (bytes_read > 0)
+		client->updateLastActivity();
 
 	buffer[bytes_read] = '\0';
 	client->appendToBuffer(buffer);
 	to_remove = false;
-
+	
 	if (client->getBuffer().length() > 511)
 	{
 		std::vector<std::string> arg;
@@ -308,14 +311,36 @@ void Server::Replies(int fd, int code, const std::string &message) const
 }
 
 
-// void Server::checkClientTimeouts()
-// {
-// 	for (size_t i = 0; i < cls.size(); ++i)
-// 	{
-// 		if (!cls[i]->getIsRegistered() && cls[i]->shouldDisconnect())
-// 			removeClient(i + 1); // +1 because 0 is server fd
-// 	}
-// }
+void Server::checkPingTimeouts()
+{
+	time_t current_time = time(NULL);
+
+	for (size_t i = 0; i < cls.size(); ++i)
+	{
+		Client* client = cls[i];
+
+		if (!client || client->getLastPingTime() == 0) continue;
+
+		// Eğer client PING bekliyorsa ve zaman aşımına uğradıysa mefta oldu diyebiliriz
+		if (client->isWaitingForPong() && 
+			(current_time - client->getLastPingTime() > PING_TIMEOUT))
+		{
+			std::vector<std::string> args;
+			args.push_back(":Ping timeout");
+			quitHandle(*client, args);
+			continue;
+		}
+		
+		// Eğer belirli bir süredir aktivite yoksa PING gönderiyoruz
+		if (current_time - client->getLastActivity() > PING_INTERVAL)
+		{
+			std::string ping_msg = "PING :" + serverName + "\r\n";
+			send(client->getFd(), ping_msg.c_str(), ping_msg.length(), 0);
+			client->setWaitingForPong(true);
+			client->setLastPingTime(current_time);
+		}
+	}
+}
 void Server::broadcast(const std::string& message, int exclude_fd)
 {
 	for (size_t i = 0; i < cls.size(); ++i)

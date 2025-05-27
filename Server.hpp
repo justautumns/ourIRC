@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 21:43:07 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:38:32 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,9 @@
 
 #define MAX_CLIENT 50
 #define BUFFER_SIZE 512
+#define CLIENT_TIMEOUT_SECONDS 180
+#define PING_INTERVAL 120
+#define PING_TIMEOUT 60
 
 class Client;
 class Channel;
@@ -85,7 +88,7 @@ class Server
 	void	nickNameHandle(Client &client, const std::vector<std::string> &arguments);
 	void	userHandle(Client &client, const std::vector<std::string> &arguments);
 	void	broadcast(const std::string& message, int exclude_fd);
-	void	checkClientTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
+	void	checkPingTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
 	void	privmsgHandle(Client &client, const std::vector<std::string>& args);
 	void	capHandle(Client &client, const std::vector<std::string>& args);
 	void	pingHandle(Client &client, const std::vector<std::string>& args);

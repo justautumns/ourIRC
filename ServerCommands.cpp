@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerCommands.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 20:29:57 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:40:53 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,15 +53,19 @@ void Server::passHandle(Client &client, const std::vector<std::string>& args)
 	else
 	{
 		Replies(client.getFd(), ERR_PASSWDMISMATCH, "PASS :Password incorrect");
-		// We have to find and disconnect this client
-		for (size_t i = 0; i < fd_polls.size(); ++i)
+		client.setInvalidPasswordAttempt();
+		if (client.getInvalidPasswordAttempt() > 2)
 		{
-			if (fd_polls[i].fd == client.getFd())
+			// We have to find and disconnect this client
+			for (size_t i = 0; i < fd_polls.size(); ++i)
 			{
-				std::vector<std::string> arg;
-				arg.push_back(":leaving\r\n");
-				quitHandle(client, arg);
-				break;
+				if (fd_polls[i].fd == client.getFd())
+				{
+					std::vector<std::string> arg;
+					arg.push_back(":leaving\r\n");
+					quitHandle(client, arg);
+					break;
+				}
 			}
 		}
 	}
@@ -366,5 +370,6 @@ void Server::pingHandle(Client &client, const std::vector<std::string>& args)
 void Server::pongHandle(Client &client, const std::vector<std::string>& args)
 {
 	(void)args;
+	client.setWaitingForPong(false); // this will mean pong received.
 	client.updateLastActivity();
 }

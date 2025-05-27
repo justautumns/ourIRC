@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mehmeyil <mehmeyil@student.42vienna.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:00:59 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/26 20:00:33 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:48:46 by mehmeyil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,10 @@ Client::Client(int fd)
 	this->isInChannel = false;
 	this->got_cap_end = false;
 	this->isOnline = true;
+	this->waiting_for_pong = false;
+	this->invalid_password_attempts = 0;
+	this->last_ping_time = 0;
+	this->last_activity = time(NULL);
 	this->hostname = "localhost";
 }
 
@@ -94,6 +98,12 @@ void Client::setInvalidPasswordAttempt()
 	updateLastActivity();
 }
 
+int Client::getInvalidPasswordAttempt()
+{
+	return this->invalid_password_attempts;
+}
+
+
 void Client::appendToBuffer(const std::string& data)
 {
 	buffer += data;
@@ -118,10 +128,34 @@ void Client::updateLastActivity()
 	last_activity = time(NULL); 
 }
 
+time_t Client::getLastActivity()
+{
+	return last_activity; 
+}
+
+void Client::setWaitingForPong(bool status)
+{
+	waiting_for_pong = status;
+}
+
+bool Client::isWaitingForPong() const
+{
+	return waiting_for_pong;
+}
+
+time_t Client::getLastPingTime() const
+{
+	return last_ping_time;
+}
+
+void Client::setLastPingTime(time_t time)
+{
+	last_ping_time = time;
+}
+
 bool Client::shouldDisconnect() const
 {
-	return (invalid_password_attempts >= 3) || 
-			(time(NULL) - last_activity > 30); // 30 sn timeout
+	return ((time(NULL) - last_activity > CLIENT_TIMEOUT_SECONDS)); // 180 sn timeout
 }
 bool Client::canRegister() const
 {
@@ -143,7 +177,7 @@ void Client::removeJoinedChannel(std::string channel_name)
 	{
 		if (joinedChannels[i].compare(channel_name) == 0)
 			joinedChannels.erase(joinedChannels.begin() + i);
-		break;
+		return;
 	}
 }
 
