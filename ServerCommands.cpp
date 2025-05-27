@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 17:59:02 by mtrojano         ###   ########.fr       */
+/*   Updated: 2025/05/27 19:26:38 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void Server::nickNameHandle(Client& client, const std::vector<std::string> &args
 	}
 
 	// This chars are considered as invalid in a nickname
-	if (newNick.find_first_of(" ,*?!@.") != std::string::npos)
+	if (newNick.find_first_of(" ,*?!@.#&") != std::string::npos)
 	{
 		Replies(client.getFd(), ERR_ERRONEUSNICKNAME, newNick + " :Erroneous nickname (a nickname cannot contain these charecters ;  ,*?!@.)");
 		return;
@@ -219,6 +219,15 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 		return;
 	}
 
+	for (size_t i = 1; i < channelName.size(); i++)
+	{
+		if (channelName[i] == '#' || channelName[i] == '&' || channelName[i] == ',')
+		{
+			Replies(client.getFd(), ERR_BADCHANMASK, channelName + " :Bad Channel Mask");
+			return;
+		}
+	}
+	
 	// Kanalı bul veya oluştur
 	Channel* channel = findOrCreateChannel(channelName);
 
