@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 16:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 17:58:45 by mtrojano         ###   ########.fr       */
+/*   Updated: 2026/03/28 13:22:00 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,13 +88,13 @@ class Server
 	void	nickNameHandle(Client &client, const std::vector<std::string> &arguments);
 	void	userHandle(Client &client, const std::vector<std::string> &arguments);
 	void	broadcast(const std::string& message, int exclude_fd);
-	void	checkPingTimeouts(); // This function took me so long to understand why server removes client immidiately I comment it out for now
+	void	checkPingTimeouts();
 	void	privmsgHandle(Client &client, const std::vector<std::string>& args);
 	void	capHandle(Client &client, const std::vector<std::string>& args);
 	void	pingHandle(Client &client, const std::vector<std::string>& args);
 	void	joinHandle(Client &client, const std::vector<std::string>& args);
 	void	quitHandle(Client &client, const std::vector<std::string>& args);
-	void	chanComments(Client &client, std::string &cmd, const std::vector<std::string>& args);
+	void	chanCommands(Client &client, std::string &cmd, const std::vector<std::string>& args);
 	void	executeKICK(Channel &channel, Client &client, const std::string& to_kick, std::string reason);
 	public :
 	void	Routine();

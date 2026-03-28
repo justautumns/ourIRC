@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:15:57 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 19:26:38 by mtrojano         ###   ########.fr       */
+/*   Updated: 2026/03/28 13:12:37 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,15 +87,13 @@ void Server::nickNameHandle(Client& client, const std::vector<std::string> &args
 
 	const std::string &newNick = args[0];
 
-	// Nickname validation according to RFC 1459 it's really gettin started to be pain to check this documentary :/
-	// BTW this Replies was also in these documentary
 	if (newNick.empty() || newNick.length() > 9)
 	{
 		Replies(client.getFd(), ERR_ERRONEUSNICKNAME, newNick + " :Erroneous nickname");
 		return;
 	}
 
-	// This chars are considered as invalid in a nickname
+	// These chars are considered as invalid in a nickname
 	if (newNick.find_first_of(" ,*?!@.#&") != std::string::npos)
 	{
 		Replies(client.getFd(), ERR_ERRONEUSNICKNAME, newNick + " :Erroneous nickname (a nickname cannot contain these charecters ;  ,*?!@.)");
@@ -160,14 +158,13 @@ void Server::userHandle(Client &client, const std::vector<std::string>& args)
 	}
 
 	const std::string &username = args[0];
-	// args[1] and args[2] are (hostname ve servername) in IRC it's kind of ignored, so user dont have to set those things 
-	// Therefore we pass 0 * hostname is 0 and server name is * but we can also set these things IDK.
-	// for realname I add this loop to grep spaces in between names.
+	// args[1] and args[2] are (hostname and servername)
+	// extracting real name
 	std::string realname = args[3];
 	for (size_t i = 4; i < args.size(); ++i)
 		realname += " " + args[i];
 
-	// But in username it has to be one word so..
+	// username has to be one word so..
 	if (username.empty() || username.find(' ') != std::string::npos)
 	{
 		Replies(client.getFd(), ERR_NEEDMOREPARAMS, "USER :Invalid username");
@@ -211,7 +208,6 @@ void Server::joinHandle(Client &client, const std::vector<std::string>& args)
 		return;
 	}
 
-	// CHANGES MADE
 	std::string channelName = args[0];
 	if (channelName[0] != '#' && channelName[0] != '&')
 	{
@@ -365,7 +361,7 @@ void Server::quitHandle(Client &client, const std::vector<std::string>& args)
 			argsss.push_back(channel->getName());
 			if (!args[0].empty()) argsss.push_back(args[0]);
 			std::string cmd = "PART";
-			chanComments(client, cmd, argsss);
+			chanCommands(client, cmd, argsss);
 			// channel->removeUser(&client);
 			// std::string partMsg = ":" + client.getNickname() + " PART " + args[0] + "\r\n";
 			// send(client.getFd(), partMsg.c_str(), partMsg.length(), 0);

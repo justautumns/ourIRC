@@ -6,7 +6,7 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 14:16:54 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 18:51:00 by mtrojano         ###   ########.fr       */
+/*   Updated: 2026/03/28 13:11:07 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void Server::executeKICK(Channel &channel, Client &client, const std::string& to
 	target->removeInvitation(channel.getName());
 	channel.removeUser(target);
 }
-void Server::chanComments(Client &client, std::string &cmd, const std::vector<std::string>& args)
+void Server::chanCommands(Client &client, std::string &cmd, const std::vector<std::string>& args)
 {
 	if (args.empty())
 	{

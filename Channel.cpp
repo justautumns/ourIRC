@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mehmeyil <mehmeyil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/15 22:12:38 by mtrojano          #+#    #+#             */
-/*   Updated: 2025/05/26 19:15:21 by mehmeyil         ###   ########.fr       */
+/*   Updated: 2026/03/28 13:19:00 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,10 +91,6 @@ void Channel::removeOperator(Client *client)
 }
 void Channel::setModes(char x)
 {
-	// if (x == 'i' || x == 't' || x == 'k' || x == 'l')
-	// {
-	// 	modes.push_back(x);
-	// }
 	if (this->hasMode(x))
 		return;
 	modes.push_back(x);
