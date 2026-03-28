@@ -6,12 +6,12 @@
 /*   By: mtrojano <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 17:06:42 by mehmeyil          #+#    #+#             */
-/*   Updated: 2025/05/27 18:56:57 by mtrojano         ###   ########.fr       */
+/*   Updated: 2026/03/28 11:57:10 by mtrojano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-
+//Checking permissions
 int Server::signal = 0;
 Server::Server(const int port_, std::string password_) : port(port_) , passwd(password_)
 {
